@@ -281,6 +281,14 @@
     height: 50px;
 }
 
+hr{
+    margin: 0 5px;
+    border: 1px solid lightgray;
+    color: inherit;
+    background-color: transparent;
+    padding: 0;
+}
+
 /* Message */
 .feedback-message {
     position: absolute;
