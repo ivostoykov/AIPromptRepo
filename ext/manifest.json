@@ -1,0 +1,46 @@
+{
+  "manifest_version": 3,
+  "name": "AI Prompt Repo",
+  "version": "1.18.24",
+  "options_page": "options.html",
+  "permissions": [
+    "activeTab",
+    "storage",
+    "tabs"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "js/dialog.js",
+        "err_utils.js",
+        "prompt-repo-helper.js"
+      ],
+      "run_at": "document_end"
+    }
+  ],
+  "icons": {
+    "16": "img/icon16.png",
+    "48": "img/icon48.png",
+    "128": "img/icon128.png"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "tmpl/sidebar.html",
+        "css/button.css",
+        "css/sidebar.css",
+        "img/*.svg",
+        "js/dialog.js"
+      ],
+      "matches": [
+        "<all_urls>"
+      ]
+    }
+  ]
+}

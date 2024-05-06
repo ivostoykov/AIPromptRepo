@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GPT Sidebar Options</title>
+    <link rel="stylesheet" href="css/options.css">
+</head>
+<body>
+    <div class="form-container">
+        <form id="repoOptionsForm">
+            <div class="el-holder">
+                <input type="checkbox" name="showEmbeddedButton" id="showEmbeddedButton" />
+                <label for="showEmbeddedButton">Show embedded button</label>
+                <div class="icon-container">
+                    <img src="img/robot.svg" id="mainButtonIcon" class="icon-button" alt="Embedded button icon" title="Embedded button icon">
+                    <img src="img/robot_sleep.svg" class="icon-button invisible" alt="Embedded button icon" title="Embedded button icon">
+                </div>
+            </div>
+            <div  class="el-holder">
+                <input type="checkbox" name="closeOnClickOut" id="closeOnClickOut" />
+                <label for="closeOnClickOut">Close Sidebar when click outside</label>
+            </div>
+            <!-- <div  class="el-holder">
+                <input type="checkbox" name="closeOnClickOut" id="closeOnClickOut" />
+                <label for="closeOnClickOut">Close Sidebar when click outside</label>
+            </div> -->
+            <div  class="el-holder">
+                <input type="checkbox" name="closeOnSendTo" id="closeOnSendTo" />
+                <label for="closeOnSendTo">Close adter Send To</label>
+            </div>
+            <div  class="el-holder">
+                <input type="checkbox" name="closeOnCopy" id="closeOnCopy" />
+                <label for="closeOnCopy">Close Sidebar after copy</label>
+            </div>
+            <!-- <div  class="el-holder">
+                <label for="textInput" class="block-label">Text Input:</label>
+                <input type="text" id="textInput" name="textInput">
+            </div> -->
+            <div  class="el-holder">
+                <label for="allowedUrls" class="block-label">Allowed Urls:</label>
+                <textarea id="allowedUrls" name="allowedUrls" rows="10"></textarea>
+            </div>
+            <button type="submit">Save</button>
+            <button type="button" id="cancelButton">Cancel</button>
+        </form>
+        <div id="message" class="message-box invisible"></div>
+    </div>
+    <script src="js/options.js"></script>
+</body>
+</html>
