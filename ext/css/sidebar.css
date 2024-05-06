@@ -415,3 +415,13 @@ dialog button{
 dialog button:active{
     box-shadow: none;
 }
+
+/* draggable */
+
+.draggable {
+    cursor: move !important;
+}
+
+.draggable.over {
+    border-top: 3px solid red;
+}

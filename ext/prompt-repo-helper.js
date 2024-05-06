@@ -266,6 +266,7 @@ async function init() {
     document.body.appendChild(container);
     container.classList.remove('invisible');
     populateDataHelper();
+    iniDrag();
   } catch (err) {
     console.error(err);
   }
