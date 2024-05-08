@@ -1,60 +1,50 @@
-var draggables;
-var container;
-var draggedElement = null;
+function iniDrag() {
+    const dropzones = [...theSideBar.querySelectorAll(".main-content")];
+    const draggables = [...theSideBar.querySelectorAll(".draggable")];
 
-function iniDrag(){
-    draggables = theSideBar.querySelectorAll('.draggable');
-    container = theSideBar.querySelector('.main-content');
-    draggedElement = null;
+    function getDragAfterElement(container, y) {
+        const draggableElements = [
+            ...container.querySelectorAll(".draggable:not(.is-dragging)")
+        ];
 
-    draggables.forEach(draggable => {
-        draggable.setAttribute('draggable', true);
+        return draggableElements.reduce(
+            (closest, child) => {
+                const box = child.getBoundingClientRect();
+                const offset = y - box.top - box.height / 2;
 
-        draggable.addEventListener('dragstart', function(e) {
-            draggedElement = this;
-            e.dataTransfer.effectAllowed = 'move';
-            e.dataTransfer.setData('text/plain', ''); // Necessary for Firefox compatibility
-        });
-
-        draggable.addEventListener('dragover', function(e) {
-            if (e.preventDefault) {
-                e.preventDefault(); // Necessary. Allows us to drop.
-            }
-            this.classList.add('over');
-            e.dataTransfer.dropEffect = 'move'; // Show a move cursor
-            return false;
-        });
-
-        draggable.addEventListener('dragleave', function() {
-            this.classList.remove('over');
-        });
-
-        draggable.addEventListener('drop', function(e) {
-            if (e.stopPropagation) {
-                e.stopPropagation(); // Stops some browsers from redirecting.
-            }
-
-            if (draggedElement !== this) {
-                // Reorder elements
-                let droppedIndex = Array.from(container.children).indexOf(this);
-                let draggedIndex = Array.from(container.children).indexOf(draggedElement);
-
-                if (droppedIndex < draggedIndex) {
-                    container.insertBefore(draggedElement, this);
+                if (offset < 0 && offset > closest.offset) {
+                    return {
+                        offset,
+                        element: child
+                    };
                 } else {
-                    container.insertBefore(draggedElement, this.nextSibling);
+                    return closest;
                 }
-            }
+            },
+            { offset: Number.NEGATIVE_INFINITY }
+        ).element;
+    }
 
-            this.classList.remove('over');
-            return false;
+    draggables.forEach((draggable) => {
+        draggable.addEventListener("dragstart", (e) => {
+            draggable.classList.add("is-dragging");
         });
 
-        draggable.addEventListener('dragend', function() {
-            draggables.forEach(draggable => {
-                draggable.classList.remove('over');
-            });
+        draggable.addEventListener("dragend", (e) => {
+            draggable.classList.remove("is-dragging");
+        });
+    });
+
+    dropzones.forEach((zone) => {
+        zone.addEventListener("dragover", (e) => {
+            e.preventDefault();
+            const afterElement = getDragAfterElement(zone, e.clientY);
+            const draggable = theSideBar.querySelector(".is-dragging");
+            if (afterElement === null) {
+                zone.appendChild(draggable);
+            } else {
+                zone.insertBefore(draggable, afterElement);
+            }
         });
     });
 }
-

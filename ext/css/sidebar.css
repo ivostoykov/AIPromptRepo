@@ -65,6 +65,11 @@
     top: 62%;
     left: 50%;
     transform: translate(-50%, -62%);
+    transition: top 0.5s ease;
+
+    &.behind{
+        top: 30%
+    }
 }
 
 .app-icon img{
@@ -179,6 +184,7 @@
 
 /* Cards */
 .card {
+    position: relative;
     border-radius: 12px;
     border: 1px solid gray;
     padding: 15px;
@@ -196,6 +202,7 @@
     background-color: lightgoldenrodyellow;
     overflow: auto;
     width: 93%;
+    z-index: 1;
 }
 
 .card-selected {
@@ -341,6 +348,7 @@ hr{
     transform: translateX(-50%);
     background-color: lightgray;
     padding: 1rem;
+    z-index: 2;
 }
 
 .edit-buttons-title {
@@ -419,9 +427,10 @@ dialog button:active{
 /* draggable */
 
 .draggable {
-    cursor: move !important;
+    cursor: move;
+
+    &.is-dragging {
+      opacity: 0.5;
+    }
 }
 
-.draggable.over {
-    border-top: 3px solid red;
-}

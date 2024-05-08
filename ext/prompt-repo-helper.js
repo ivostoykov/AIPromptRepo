@@ -241,6 +241,12 @@ function populateDataHelper(){
 }
 
 async function init() {
+  document.addEventListener('click', e => {
+    if(!theSideBar.contains(e.target) && repoOptions?.closeOnClickOut){
+      swapSidebarWithButton();
+    }
+    return;
+  });
   await getOptionsFromStorage();
   const shouldContinue = checkIfUrlAllowed();
   if(shouldContinue){
@@ -275,7 +281,7 @@ async function init() {
 function checkIfUrlAllowed(){
   try {
       const urls = repoOptions?.allowedUrls?.split(/[;,\n]+/)?.filter(Boolean);
-      return urls.length > 0 && urls.some(el => el.indexOf(location.hostname) > -1);
+      return urls.length > 0 && urls.some(el => el.includes(location.hostname) || location.hostname.includes(el));
     } catch (err) {
       console.error(err);
       return false;
@@ -401,7 +407,7 @@ function onRibbonButtonClick(e) {
         theSideBar.querySelector('.dropdown-menu')?.classList.toggle('invisible');
         break;
       case 'search':
-        ;
+        setTimeout(e => theSideBar.querySelector('.app-icon')?.classList.toggle('behind'), 250);
         break;
       default:
         showMessage(`Unknown type ${type}`);
@@ -422,7 +428,7 @@ function onNewItemClicked(e) {
 
   const card = mainContent?.querySelector('.card');
   if (!card) {
-    sbeShowMessage('No card found', 'error');
+    showMessage('No card found', 'error');
     return;
   }
 
@@ -563,7 +569,7 @@ function deleteCard(e, cardOriginator) {
 
 function onDeleteConfirmation(e, cardOriginator){
   if (!cardOriginator) {
-      sbeShowMessage('Unknown item!', 'error');
+      showMessage('Unknown item!', 'error');
       return;
   }
 
@@ -619,7 +625,15 @@ function normaliseFieldsAndButtons(editedEl, editRibbon){
 }
 
 function getInputElement(){
-  return document.querySelector('#prompt-textarea') || document.querySelector('div.textarea') || document.querySelector('textarea');
+  let receiver = document.querySelector('#prompt-textarea') || document.querySelector('div.textarea') || document.querySelector('textarea');
+  if(!receiver){
+    receiver = document.activeElement;
+    if (!receiver || !(receiver.tagName === 'INPUT' ||
+        receiver.tagName === 'TEXTAREA' || receiver.isContentEditable)) {
+          receiver = false;
+    }
+  }
+  return receiver;
 }
 
 function sendTo(e, cardOriginator, run = false) {
@@ -770,14 +784,14 @@ function normaliseCard(card) {
 
 function copyDataItemContent(e, cardOriginator) {
   if (!cardOriginator) {
-      sbeShowMessage('Unknown item!', 'error');
+      showMessage('Unknown item!', 'error');
       return;
   }
 
   const title = cardOriginator.querySelector('.card-title');
   const index = parseInt(title.getAttribute('data-index'), 10);
   if (index > repoData.length) {
-      sbeShowMessage(`Index (${index.toString()}) is out of bound (${repoData.length})`);
+      showMessage(`Index (${index.toString()}) is out of bound (${repoData.length})`);
   }
 
   var hint = theSideBar.querySelector('#copyHint');
@@ -790,7 +804,7 @@ function copyDataItemContent(e, cardOriginator) {
   }
 
   if(repoOptions && repoOptions.closeOnCopy){
-      sbeSwapSidebarWithButton();
+      swapSidebarWithButton();
   }
 
   hint.style.right = '';
