@@ -22,9 +22,7 @@ On the right-hand side, from right to left, are:
 
 #### Search to filter
 
-<video src="meida/search.mp4" controls>
-  Your browser does not support the video tag.
-</video>
+<img src="meida/search.gif" />
 
 ## Cards
 
