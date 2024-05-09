@@ -17,6 +17,21 @@ On the left is the main menu (<img src="ext/img/menu.svg" height="16"/>).
 
 On the right-hand side, from right to left, are the close button (<img src="ext/img/close.svg" height="16"/>), new item button (<img src="ext/img/newitem.svg" height="16"/>), and search button (<img src="ext/img/search.svg" height="16"/>).
 
+## Cards
+
+![Card UI](meida/card.png)
+
+The elements from left to right are:
+
+* Expand/Collapse button ( <img src="ext/img/left-arrowhead.svg" height="16"/> )
+* Title
+* Copy button ( <img src="ext/img/copy.svg" height="24"/> )
+* Edit button ( <img src="ext/img/edit.svg" height="24"/> )
+* Send to button ( <img src="ext/img/sendto.svg" height="24"/> )
+* Send to and Run button ( <img src="ext/img/sendtorun.svg" height="24"/> )
+* Delete button ( <img src="ext/img/delete.svg" height="24"/> )
+
+
 ## Options
 ![Options page](meida/options.png)
 
