@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "AI Prompt Repo",
-  "version": "1.19.74",
+  "version": "1.20.33",
   "options_page": "options.html",
   "permissions": [
     "activeTab",

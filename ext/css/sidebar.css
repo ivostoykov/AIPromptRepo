@@ -187,11 +187,9 @@
     position: relative;
     border-radius: 12px;
     border: 1px solid gray;
-    padding: 15px;
+    padding: 15px 15px 15px 1px;
     margin-bottom: 1rem;
-    /* width: fit-content; */
     box-shadow: -10px 10px 3px gray;
-    /* flex-grow: 1; */
     transition: top 0.5s ease, height 0.5s ease, background-color 0.5s ease, right 0.5s ease;
 }
 
@@ -203,6 +201,15 @@
     overflow: auto;
     width: 93%;
     z-index: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    padding: 15px;
+}
+
+.card-expanded > .card-header{
+    padding-bottom: 15px;
+    border-bottom: 1px solid black;
 }
 
 .card-selected {
@@ -212,7 +219,7 @@
 .card-header {
     display: flex;
     justify-content: space-between;
-    cursor: pointer;
+    position: relative;
 }
 
 .card-title {
@@ -220,6 +227,7 @@
     font-weight: bold;
     font-size: 18px;
     line-height: 2;
+    padding-left: 27px;
 }
 
 .card-body {
@@ -242,6 +250,25 @@
 
 .card-btn {
     padding: 0.25rem;
+    cursor: pointer;
+}
+
+.expander {
+    position: absolute;
+    left: 0px;
+    top: 2px;
+    display: block;
+    background-color: transparent;
+    transition: transform 0.5s ease-out, left 0.5s ease-out;
+
+    &:hover{
+        background-color: transparent !important;
+    }
+
+    &.is-open{
+        transform: rotate(90deg);
+        left: -12px;
+    }
 }
 
 .card-btn:hover {
@@ -431,6 +458,22 @@ dialog button:active{
 
     &.is-dragging {
       opacity: 0.5;
+      border: 1px solid red;
     }
 }
 
+.drag-completed {
+    animation: colorCycle 1.5s 1;
+    /* animation: colorCycle 1s infinite; */
+}
+
+@keyframes colorCycle {
+    0%, 100% {
+        background-color: inherit;
+        border: inherit;
+    }
+    15% {
+        background-color: #ccf8b2;
+        border: 1px solid red;
+    }
+}

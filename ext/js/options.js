@@ -1,4 +1,6 @@
 const storageOptionsKey = 'repoOptions';
+const manifest = chrome.runtime.getManifest();
+
 document.addEventListener('DOMContentLoaded', loadSettings);
 document.getElementById('repoOptionsForm').addEventListener('submit', sbeSaveSettings);
 document.getElementById('cancelButton').addEventListener('click', cancelOptions);
@@ -23,6 +25,7 @@ function sbeSaveSettings(e) {
 }
 
 function loadSettings() {
+    setTitle();
     animateMainButton();
     const defaults = {
         "allowedUrls": `chatgpt.com
@@ -79,4 +82,8 @@ function animateMainButton(){
     setTimeout(()=>{
         animateMainButton();
     }, tic);
+}
+
+function setTitle(){
+    document.querySelector('#extName').textContent = document.title = `${manifest.name} version ${manifest.version}`;
 }

@@ -242,7 +242,8 @@ function populateDataHelper(){
 
 async function init() {
   document.addEventListener('click', e => {
-    if(!theSideBar.contains(e.target) && repoOptions?.closeOnClickOut){
+    if(!repoOptions?.closeOnClickOut){  return;  }
+    if(!e.composedPath().includes(theShadowRoot.host)){
       swapSidebarWithButton();
     }
     return;
@@ -280,8 +281,9 @@ async function init() {
 
 function checkIfUrlAllowed(){
   try {
-      const urls = repoOptions?.allowedUrls?.split(/[;,\n]+/)?.filter(Boolean);
-      return urls.length > 0 && urls.some(el => el.includes(location.hostname) || location.hostname.includes(el));
+      const urls = repoOptions?.allowedUrls?.split(/[;,\n]+/)?.filter(Boolean) || [];
+      if(urls.length < 1 || urls[0].trim() === '*'){  return true;  }
+      return urls.some(el => el.includes(location.hostname) || location.hostname.includes(el));
     } catch (err) {
       console.error(err);
       return false;
@@ -300,9 +302,15 @@ function onCardHeaderClick(e) {
   removeCardEditableAttribute();
   if (isCardInVisible) {
       card.classList.add('card-selected', 'card-expanded');
+      card.classList.remove('draggable');
+      card.removeAttribute('draggable')
       cardBody.classList.remove('invisible');
+      card.querySelector('.expander').classList.add('is-open');
   } else {
       card.classList.remove('card-selected', 'card-expanded');
+      card.classList.add('draggable');
+      card.setAttribute('draggable', 'ture');
+      card.querySelector('.expander').classList.remove('is-open');
   }
 }
 
@@ -341,7 +349,6 @@ function populateData() {
   (repoData || []).forEach((el, idx) => {
       const newCard = card.cloneNode(true);
       newCard.setAttribute('data-index', `${idx}`);
-      newCard.querySelector('.card-header').addEventListener('click', onCardHeaderClick);
       newCard.querySelectorAll('.invisible').forEach(invisible => invisible.classList.remove('invisible'));
 
       newCard.querySelectorAll('.card-btn')?.forEach(btn => {
@@ -356,7 +363,7 @@ function populateData() {
 
       const bodyEl = newCard.querySelector('.card-body');
       if (bodyEl) {
-          bodyEl.innerHTML = el.body.replace(/\n/g, '<br/>');
+          bodyEl.innerHTML = el.body?.replace(/\n/g, '<br/>');
           bodyEl.setAttribute('data-index', `${idx}`);
           bodyEl.classList.add('invisible');
       }
@@ -409,6 +416,9 @@ function onRibbonButtonClick(e) {
       case 'search':
         setTimeout(e => theSideBar.querySelector('.app-icon')?.classList.toggle('behind'), 250);
         break;
+      case "expand":
+        onCardHeaderClick(e);
+        break;
       default:
         showMessage(`Unknown type ${type}`);
   }
@@ -452,6 +462,7 @@ function editCard(e, cardOriginator) {
       return;
   }
 
+  cardOriginator.classList.remove('draggable');
   cardOriginator.querySelectorAll('.invisible').forEach(el => el.classList.remove('invisible'));
   cardOriginator.classList.add('card-selected', 'card-expanded');
   const cardTitle = cardOriginator.querySelector('.card-title');
@@ -520,10 +531,10 @@ function saveEdit(skip = false){
   if(isTitle){
       prepareNextToEdit(editedEl, editRibbon);
   } else {
+      editedEl.closest('.card')?.classList.add('draggable');
       normaliseFieldsAndButtons(editedEl, editRibbon);
   }
   theSideBar.querySelectorAll('.dimmed').forEach(el => el.classList.remove('dimmed'));
-  console.log(`>>> ${theSideBar.querySelectorAll('.dimmed').length} dimmed elements found`);
 }
 
 function cancelEdit(){
@@ -749,23 +760,6 @@ function removeCardEditableAttribute() {
   });
 }
 
-function onCardHeaderClick(e) {
-  if(theSideBar.querySelector('.card-field-editable')){
-      return;
-  }
-  const card = e.target.closest('.card');
-  const cardBody = card.querySelector('.card-body');
-  const isCardInVisible = cardBody.classList.contains('invisible');
-
-  colapseAllCardBodies();
-  removeCardEditableAttribute();
-  if (isCardInVisible) {
-      card.classList.add('card-selected', 'card-expanded');
-      cardBody.classList.remove('invisible');
-  } else {
-      card.classList.remove('card-selected', 'card-expanded');
-  }
-}
 
 function normaliseCard(card) {
   if (!card) {
