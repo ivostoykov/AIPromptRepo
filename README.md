@@ -31,6 +31,9 @@ On the right-hand side, from right to left, are:
 The elements from left to right are:
 
 * Expand/Collapse button ( <img src="ext/img/left-arrowhead.svg" height="16"/> )
+
+![Expand and Collapse](meida/expand.gif)
+
 * Title - a free descriptive text giving a hint what the card contains
 * Copy button ( <img src="ext/img/copy.svg" height="24"/> )
 * Edit button ( <img src="ext/img/edit.svg" height="24"/> )
