@@ -869,6 +869,8 @@ function importedData(e) {
             if (chrome.runtime.lastError) {
                 console.error("Error saving data:", chrome.runtime.lastError);
             } else {
+                repoData = [...data];
+                repoData.loaded = true;
                 showMessage('Data imported successfully.', 'success');
                 populateDataHelper();
             }
