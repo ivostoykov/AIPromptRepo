@@ -1,4 +1,4 @@
-# AI Prompt Repo vesion 1.19.97
+# AI Prompt Repo
 
 The original idea was to maintain a set of predefined ChatGPT prompts that could be used as is or with minor modifications to suit the flow. However, it became apparent that various contexts required the inclusion of some recurring static information, leading to a slight expansion of the functionality. For more details, see the Options section.
 
@@ -38,7 +38,21 @@ The elements from left to right are:
 * Copy button ( <img src="ext/img/copy.svg" height="24"/> )
 * Edit button ( <img src="ext/img/edit.svg" height="24"/> )
 * Send to button ( <img src="ext/img/sendto.svg" height="24"/> )
+
+**Note:** This will try to insert the body of the card into recognizable input or active elements that accept user input. As feasible targets are text inputs, textareas, and elements with set contenteditable attribute. (*see the next item for more information*)
+
 * Send to and Run button ( <img src="ext/img/sendtorun.svg" height="24"/> )
+
+![Execute](meida/execute.gif)
+
+---
+
+**Note 1:** This is tested and expected to work only with AI Web interfaces. (*See next Note 2*)
+
+**Note 2:** Currently ChatGPT, Gemini (Google) and You.com are supported. There is a chance for similar web services using a `textarea` for the user input to work as well.
+
+---
+
 * Delete button ( <img src="ext/img/delete.svg" height="24"/> )
 
 
