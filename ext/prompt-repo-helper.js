@@ -243,6 +243,7 @@ function populateDataHelper(){
 async function init() {
   document.addEventListener('click', e => {
     if(!repoOptions?.closeOnClickOut){  return;  }
+    if(!theShadowRoot) {  return;  }
     if(!e.composedPath().includes(theShadowRoot.host)){
       swapSidebarWithButton();
     }
@@ -320,6 +321,7 @@ function swapButtonWithSidebar() {
 }
 
 function swapSidebarWithButton() {
+  if(!theMainButton)  {  return;  }
   if(repoOptions.showEmbeddedButton){
     theMainButton.classList.remove('invisible');
   }
@@ -463,7 +465,10 @@ function editCard(e, cardOriginator) {
   }
 
   cardOriginator.classList.remove('draggable');
-  cardOriginator.querySelectorAll('.invisible').forEach(el => el.classList.remove('invisible'));
+  cardOriginator.querySelector('.expander').classList.add('invisible');
+  cardOriginator.querySelectorAll('.invisible:not(.expander)').forEach(el => el.classList.remove('invisible'));
+
+  // cardOriginator.querySelectorAll('.invisible').forEach(el => el.classList.remove('invisible'));
   cardOriginator.classList.add('card-selected', 'card-expanded');
   const cardTitle = cardOriginator.querySelector('.card-title');
   const cardIndex = parseInt(cardOriginator.getAttribute('data-index'), 10);
@@ -633,6 +638,7 @@ function normaliseFieldsAndButtons(editedEl, editRibbon){
   editedEl.classList.add('invisible');
   editRibbon.classList.remove('edit-buttons-body');
   editRibbon.classList.add('invisible');
+  editedEl.closest('.card').querySelector('.expander').classList.remove('invisible');
 }
 
 function getInputElement(){
@@ -830,11 +836,12 @@ function exportData(e) {
       return;
   }
 
+  const exportFileName = `${manifest.name.replace(/\t/g, '_')}_${manifest.version}_export_${(new Date()).toISOString().split('.')[0].replace(/\D/g, '')}.json`;
   const result = JSON.stringify(repoData);
   const url = URL.createObjectURL(new Blob([result], { type: 'application/json' }));
   const anchor = document.createElement('a');
   anchor.href = url;
-  anchor.download = 'export.json';
+  anchor.download = exportFileName;
   document.body.appendChild(anchor);
   anchor.click();
   document.body.removeChild(anchor);

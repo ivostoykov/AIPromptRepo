@@ -44,11 +44,21 @@
                 <label for="allowedUrls" class="block-label">Allowed Urls:</label>
                 <textarea id="allowedUrls" name="allowedUrls" rows="10"></textarea>
             </div>
-            <button type="submit">Save</button>
-            <button type="button" id="cancelButton">Cancel</button>
+            <div class="extra-ribbon">
+                <button id="backup" type="button">Backup Now</button>
+                <button id="import" type="button">Import</button>
+                <button id="export" type="button">Export</button>
+                <button id="exportBackup" type="button">Export Backup</button>
+            </div>
+            <div class="main-buttons-container">
+                <button type="submit">Save</button>
+                <button type="button" id="cancelButton">Cancel</button>
+            </div>
         </form>
         <div id="message" class="message-box invisible"></div>
     </div>
+    <input type="file" accept="application/json" name="importedData" id="importedData" class="invisible" />
+
     <script src="js/options.js"></script>
 </body>
 </html>

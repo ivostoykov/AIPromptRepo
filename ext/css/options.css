@@ -27,7 +27,7 @@ body {
     grid-column: 1 / -1;
 }
 
-.el-holder label + textarea {
+.el-holder label+textarea {
     order: 0;
 }
 
@@ -41,7 +41,7 @@ label {
     min-width: 120px
 }
 
-.block-label{
+.block-label {
     display: block;
 }
 
@@ -85,7 +85,7 @@ button[type="submit"] {
     color: white;
 }
 
-.message-box{
+.message-box {
     padding: 1rem 0.5rem;
     margin: 1rem 0 0 0;
 }
@@ -114,9 +114,9 @@ button[type="submit"] {
 .tooltip {
     position: relative;
     display: inline-block;
-  }
+}
 
-  .tooltip .tooltip-text {
+.tooltip .tooltip-text {
     visibility: hidden;
     width: auto;
     background-color: black;
@@ -129,16 +129,42 @@ button[type="submit"] {
     bottom: 100%;
     left: 1%;
     margin-left: -60px;
-  }
+}
 
-  .tooltip:hover .tooltip-text {
+.tooltip:hover .tooltip-text {
     visibility: visible;
-  }
+}
 
-  .info-circle {
+.info-circle {
     background-color: #e8e8e8;
     border-radius: 50%;
     padding: 5px;
     margin-left: 5px;
     font-size: 16px;
-  }
+}
+
+/* extra buttons rubbon */
+.extra-ribbon {
+    padding: 25px 15px;
+    background-color: white;
+    width: 93%;
+    display: flex;
+    position: relative;
+    justify-content: center;
+    border: 1px solid grey;
+}
+
+.extra-ribbon button {
+    position: relative;
+    position: relative;
+    margin: 0 25px;
+    background-color: gray;
+    color: white;
+}
+
+.main-buttons-container {
+    position: relative;
+    display: flex;
+    justify-content: space-evenly;
+    padding-top: 25px;
+}
