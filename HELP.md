@@ -1,5 +1,9 @@
 ## UI
 
+### Main View
+
+<img src="meida/main.png" height="480"/>
+
 ### Main Menu
 
 ![Main Menu](meida/menu.png)
@@ -26,22 +30,42 @@ On the right-hand side, from right to left, are:
 
 The elements from left to right are:
 
+---
+
 * Expand/Collapse button ( <img src="ext/img/left-arrowhead.svg" height="16"/> )
 
 <img src="meida/expand.gif" width="450" alt="Expand and Collapse" />
 
+---
+
 * Title - a free descriptive text giving a hint what the card contains
 * Copy button ( <img src="ext/img/copy.svg" height="24"/> )
+
+---
+
 * Edit button ( <img src="ext/img/edit.svg" height="24"/> )
+
+`Save` ( <img src="ext/img/save.svg" height="24"/> ), `Cancel` ( <img src="ext/img/cancel.svg" height="24"/> ) or `Skipt` ( <img src="ext/img/skip.svg" height="24"/> ) to the next will be available when edit mode is active.
+
+One can edit the title ...
+
+<img src="meida/edit_title.png" width="450" alt="Expand and Collapse" />
+
+or the body.
+
+<img src="meida/edit_body.png" width="450" alt="Expand and Collapse" />
+
+---
+
 * Send to button ( <img src="ext/img/sendto.svg" height="24"/> )
 
 **Note:** This will try to insert the body of the card into recognizable input or active elements that accept user input. As feasible targets are text inputs, textareas, and elements with set contenteditable attribute. (*see the next item for more information*)
 
+---
+
 * Send to and Run button ( <img src="ext/img/sendtorun.svg" height="24"/> )
 
 <img src="meida/execute.gif" width="450" alt="Execute" title="Execute"/>
-
----
 
 **Note 1:** This is tested and expected to work only with AI Web interfaces. (*See next Note 2*)
 
@@ -50,6 +74,8 @@ The elements from left to right are:
 ---
 
 * Delete button ( <img src="ext/img/delete.svg" height="24"/> )
+
+
 
 
 ## Options
@@ -75,6 +101,8 @@ translate.google.com
 ```
 
 ### Other buttons
+
+<img src="meida/other_buttons.png" alt="Other buttons">
 
 Additional options are available for importing, exporting, and backing up data.
 
