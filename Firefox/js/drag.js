@@ -43,14 +43,19 @@ function iniDrag() {
     dropzones.forEach((zone) => {
         zone.addEventListener("dragover", (e) => {
             e.preventDefault();
+
             const afterElement = getDragAfterElement(zone, e.clientY);
             const draggable = theSideBar.querySelector(".is-dragging");
+            if(!draggable) {  return;  }
+
             if (afterElement === null) {
                 zone.appendChild(draggable);
                 zoneIndex = undefined;
             } else {
                 zone.insertBefore(draggable, afterElement);
-                zoneIndex = parseInt(afterElement.dataset.index, 10);
+                if(afterElement?.dataset?.index){
+                    zoneIndex = parseInt(afterElement.dataset.index, 10);
+                }
             }
         });
     });
