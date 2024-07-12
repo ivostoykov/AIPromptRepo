@@ -1,40 +1,46 @@
 {
-  "manifest_version": 2,
+  "manifest_version": 3,
   "name": "AI Prompt Repo",
-  "version": "1.20.74",
-  "description": "Storing predefined text snippets for repetitive use.",
-  "icons": {
-    "16": "img/icon16.png",
-    "48": "img/icon48.png",
-    "128": "img/icon128.png"
-  },
-  "options_ui": {
-    "page": "options.html",
-    "open_in_tab": true
-  },
+  "version": "1.20.88",
+  "options_page": "options.html",
   "permissions": [
     "activeTab",
     "storage",
     "tabs"
   ],
   "background": {
-    "scripts": [
-      "background.js"
-    ],
-    "persistent": false
+    "scripts": ["background.js"]
   },
   "content_scripts": [
     {
       "matches": [
-        "*://*/*"
+        "<all_urls>"
       ],
       "js": [
         "js/dialog.js",
-        "err_utils.js",
-        "prompt-repo-helper.js",
-        "js/drag.js"
+        "js/drag.js",
+        "prompt-repo-helper.js"
       ],
-      "all_frames": true
+      "run_at": "document_end"
+    }
+  ],
+  "icons": {
+    "16": "img/icon16.png",
+    "48": "img/icon48.png",
+    "128": "img/icon128.png"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "tmpl/sidebar.html",
+        "css/button.css",
+        "css/sidebar.css",
+        "img/*.svg",
+        "js/dialog.js"
+      ],
+      "matches": [
+        "<all_urls>"
+      ]
     }
   ],
   "browser_specific_settings": {

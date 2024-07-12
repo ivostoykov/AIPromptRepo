@@ -2,14 +2,16 @@ const manifest = chrome.runtime.getManifest();
 var theShadowRoot;
 var theMainButton;
 var theSideBar;
-var repoData;
-var repoSettings;
-var repoOptions;
+var repoData = [];
+var repoSettings = {};
+var repoOptions = {};
+
 const storageDataKey = 'repo';
 const storageSettingsKey = 'settings';
 const storageOptionsKey = 'repoOptions';
 const currentPageTitle = Array.from(document.getElementsByTagName('title')).map(el => el.textContent).join(',');
 const eventClick = new Event('click', { bubbles: true, cancelable: true });
+
 let timerId;
 
 Array.prototype.loaded = false;
@@ -613,6 +615,7 @@ function updateData(objData, rebuild = true) {
     if (chrome.runtime.lastError) {
       showMessage(chrome.runtime.lastError.message, 'error');
     } else {
+      repoData = Array.from(objData);
       showMessage('Data saved.', 'success');
       if(rebuild) {
         populateDataHelper();

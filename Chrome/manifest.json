@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "AI Prompt Repo",
-  "version": "1.20.74",
+  "version": "1.20.89",
   "options_page": "options.html",
   "permissions": [
     "activeTab",
@@ -18,9 +18,8 @@
       ],
       "js": [
         "js/dialog.js",
-        "err_utils.js",
-        "prompt-repo-helper.js",
-        "js/drag.js"
+        "js/drag.js",
+        "prompt-repo-helper.js"
       ],
       "run_at": "document_end"
     }

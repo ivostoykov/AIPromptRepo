@@ -1,15 +1,17 @@
-const manifest = browser.runtime.getManifest();
+const manifest = chrome.runtime.getManifest();
 var theShadowRoot;
 var theMainButton;
 var theSideBar;
-var repoData;
-var repoSettings;
-var repoOptions;
+var repoData = [];
+var repoSettings = {};
+var repoOptions = {};
+
 const storageDataKey = 'repo';
 const storageSettingsKey = 'settings';
 const storageOptionsKey = 'repoOptions';
 const currentPageTitle = Array.from(document.getElementsByTagName('title')).map(el => el.textContent).join(',');
 const eventClick = new Event('click', { bubbles: true, cancelable: true });
+
 let timerId;
 
 Array.prototype.loaded = false;
@@ -26,7 +28,7 @@ if (document.readyState !== 'loading') {
   });
 }
 
-browser.runtime.onMessage.addListener(async function (request, sender, sendResponse) {
+chrome.runtime.onMessage.addListener(async function (request, sender, sendResponse) {
   switch (request.action){
     case 'optionsChanged':
       await init();
@@ -49,29 +51,29 @@ async function getOptionsFromStorage() {
   };
 
   try {
-    const opt = await browser.storage.sync.get([storageOptionsKey]);
+    const opt = await chrome.storage.sync.get([storageOptionsKey]);
     repoOptions = Object.assign({}, defaults, (opt?.[storageOptionsKey] || {}));
-    const result = await browser.storage.local.get([storageDataKey, storageSettingsKey]);
+    const result = await chrome.storage.local.get([storageDataKey, storageSettingsKey]);
     if (result) {
       repoData = result?.[storageDataKey] || [];
       repoData.loaded = true;
       repoSettings = result?.[storageSettingsKey] || {};
     }
   } catch (e) {
-    showMessage(browser.runtime.lastError.message, 'error');
+    showMessage(chrome.runtime.lastError.message, 'error');
     return;
   }
 }
 
 function getExtURL(resourceRelativePath){
-  return browser.runtime.getURL(resourceRelativePath)
+  return chrome.runtime.getURL(resourceRelativePath)
 }
 
 function getStyle(cssFile) {
   const linkElem = document.createElement("link");
   linkElem.setAttribute("rel", "stylesheet");
   if(cssFile)  {
-    linkElem.setAttribute("href", browser.runtime.getURL(cssFile));
+    linkElem.setAttribute("href", chrome.runtime.getURL(cssFile));
   }
     return linkElem;
 };
@@ -87,7 +89,7 @@ function buildMainButton(){
   ['img/robot.svg', 'img/robot_sleep.svg'].forEach((el, i) => {
     const img = document.createElement('img');
     img.width = "0px";
-    img.src = browser.runtime.getURL(el);
+    img.src = chrome.runtime.getURL(el);
     img.classList.add('img-btn');
     if(i === 1){
       img.classList.add('invisible');
@@ -133,7 +135,7 @@ function initSidebar() {
   });
 
   theSideBar.querySelector('#menuOptions').addEventListener('click', function(e) {
-    browser.runtime.sendMessage({action: "openOptionsPage"});
+    chrome.runtime.sendMessage({action: "openOptionsPage"});
     theSideBar.querySelector('.dropdown-menu')?.classList.toggle('invisible');
   });
 
@@ -174,7 +176,7 @@ function initSidebar() {
 
 async function buildSidebarAndFetchContent(sidebarLoadedCallback) {
   try {
-    const response = await fetch(browser.runtime.getURL('tmpl/sidebar.html'));
+    const response = await fetch(chrome.runtime.getURL('tmpl/sidebar.html'));
     const data = await response.text();
     theSideBar = Object.assign(document.createElement('div'), {
       id: 'aiPromptRepoSidebar',
@@ -262,7 +264,7 @@ async function init() {
   }
 
   try {
-    // manifest = browser.runtime.getManifest();
+    // manifest = chrome.runtime.getManifest();
     var container = document.createElement('ai-prompt-repo');
     container.classList.add('invisible');
     theShadowRoot = container.attachShadow({ mode: 'open' });
@@ -609,10 +611,11 @@ function removedAsNew(card){
 }
 
 function updateData(objData, rebuild = true) {
-  browser.storage.local.set({ [storageDataKey]: objData }, function () {
-    if (browser.runtime.lastError) {
-      showMessage(browser.runtime.lastError.message, 'error');
+  chrome.storage.local.set({ [storageDataKey]: objData }, function () {
+    if (chrome.runtime.lastError) {
+      showMessage(chrome.runtime.lastError.message, 'error');
     } else {
+      repoData = Array.from(objData);
       showMessage('Data saved.', 'success');
       if(rebuild) {
         populateDataHelper();
@@ -872,9 +875,9 @@ function importedData(e) {
               data.push({ "title": obj[i]?.title || `title ${i}`, "body": obj[i]?.body || `body ${i}` });
           }
 
-          browser.storage.local.set({ [storageDataKey]: data }, function() {
-            if (browser.runtime.lastError) {
-                console.error("Error saving data:", browser.runtime.lastError);
+          chrome.storage.local.set({ [storageDataKey]: data }, function() {
+            if (chrome.runtime.lastError) {
+                console.error("Error saving data:", chrome.runtime.lastError);
             } else {
                 repoData = [...data];
                 repoData.loaded = true;

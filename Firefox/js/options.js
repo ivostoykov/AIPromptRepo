@@ -1,7 +1,7 @@
 const storageDataKey = 'repo';
 const storageDataBackupKey = 'repoBackup';
 const storageOptionsKey = 'repoOptions';
-const manifest = browser.runtime.getManifest();
+const manifest = chrome.runtime.getManifest();
 
 document.addEventListener('DOMContentLoaded', loadSettings);
 document.getElementById('repoOptionsForm').addEventListener('submit', saveSettings);
@@ -25,7 +25,7 @@ function saveSettings(e) {
         optionsData[element.id || i] = element.type === 'checkbox' ? element?.checked || false : element?.value || '';
     }
 
-    browser.storage.sync.set({[storageOptionsKey]: optionsData}, function() {
+    chrome.storage.sync.set({[storageOptionsKey]: optionsData}, function() {
         showMessage('Settings saved', 'success');
     });
 }
@@ -42,7 +42,7 @@ function loadSettings() {
         "closeOnSendTo": false
     };
 
-    browser.storage.sync.get([storageOptionsKey], function(obj) {
+    chrome.storage.sync.get([storageOptionsKey], function(obj) {
         // const formData = obj[storageOptionsKey] || {};
         const formData = Object.assign({}, defaults, (obj?.[storageOptionsKey] || {}));
         Object.keys(formData).forEach(key => {
@@ -141,9 +141,9 @@ function importedData(e) {
                 data.push({ "title": obj[i]?.title || `title ${i}`, "body": obj[i]?.body || `body ${i}` });
             }
 
-            browser.storage.local.set({ [storageDataKey]: data }, function() {
-              if (browser.runtime.lastError) {
-                  showMessage(`Error saving data: ${browser.runtime.lastError}`, 'error');
+            chrome.storage.local.set({ [storageDataKey]: data }, function() {
+              if (chrome.runtime.lastError) {
+                  showMessage(`Error saving data: ${chrome.runtime.lastError}`, 'error');
               } else {
                   showMessage('Data imported successfully.', 'success');
               }
@@ -157,9 +157,9 @@ function importedData(e) {
 
 function exportData(e, storageKey, callback) {
     const isBackup = storageKey.toLowerCase().indexOf('backup') > -1;
-    browser.storage.local.get([storageKey], result => {
-        if(browser.runtime?.lastError?.message){
-            showMessage(browser.runtime.lastError.message, 'error');
+    chrome.storage.local.get([storageKey], result => {
+        if(chrome.runtime?.lastError?.message){
+            showMessage(chrome.runtime.lastError.message, 'error');
             return;
         }
         if (result) {
@@ -190,9 +190,9 @@ function doExport(repoData, isBackup){
 
 function createBackup(repoData, isBackup){
     isBackup = true;
-    browser.storage.local.set({ [storageDataBackupKey]: repoData }, function() {
-        if (browser.runtime.lastError) {
-            showMessage(`Error saving data: ${browser.runtime.lastError}`);
+    chrome.storage.local.set({ [storageDataBackupKey]: repoData }, function() {
+        if (chrome.runtime.lastError) {
+            showMessage(`Error saving data: ${chrome.runtime.lastError}`);
         } else {
             showMessage('Data backup was successful.', 'success');
         }

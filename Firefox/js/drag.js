@@ -63,11 +63,20 @@ function reorderRepoData(fromIndex, moveBeforeIndex){
         return;
     }
 
-    if(!moveBeforeIndex){
+    if(typeof(moveBeforeIndex) !== 'number'){
         repoData.push(el[0]);
     } else {
         repoData.splice(moveBeforeIndex, 0, el[0]);
     }
 
     updateData(repoData, false);
+    updateChildrenIndex();
+}
+
+function updateChildrenIndex(){
+    const cards = theSideBar.querySelectorAll ('.card');
+    if(!cards) {  return;  }
+    cards.forEach((card, idx) => {
+        card.setAttribute('data-index', idx);
+    });
 }
