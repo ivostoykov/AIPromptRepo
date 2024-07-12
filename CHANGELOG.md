@@ -1,5 +1,9 @@
 # List of significant changes and bug fixes going back to version 1.1
 
+### Changes in version 1.20.89 - latest
+
+- drag and drop bug fixed
+
 ### Changes in version 1.20
 
 This version added some new functionality in
