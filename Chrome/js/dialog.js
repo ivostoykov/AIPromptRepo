@@ -1,5 +1,6 @@
 function showDialog(message) {
     return new Promise((resolve, reject) => {
+        const theSideBar = getSideBar();
         const container = theSideBar.querySelector(".main-container");
         dialogTemplate = theSideBar.querySelector("#dialogTemplate");
         container.appendChild(dialogTemplate.content.cloneNode(true));

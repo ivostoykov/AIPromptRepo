@@ -1,12 +1,14 @@
 # List of significant changes and bug fixes going back to version 1.1
 
-### Changes in version 1.20.89 - latest
+### Changes in version 1.21.12 - latest
+
+- Card indexing was refactored
+- Dragging and dropping was reorganized according to the new indexing
+- Callbacks were replaced with async/await
+
+### Changes in version 1.20.92
 
 - drag and drop bug fixed
-
-### Changes in version 1.20
-
-This version added some new functionality in
 
 #### The Sidebar
 
