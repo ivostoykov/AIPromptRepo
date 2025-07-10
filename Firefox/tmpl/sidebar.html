@@ -16,8 +16,9 @@
         </div>
         <div class="ribbon-controls">
             <div id="searchBoxContainer" class="search-icon" data-type="search">
-                <input type="text" id="searchBox" class="search-box"/>
+                <input type="text" id="searchBox" class="search-box" />
                 <img src="" data-resource="img/search.svg" alt="Search">
+                <span id="clearSearchBoxBtn" class="clear-search-box-btn invisible">&times;</span>
             </div>
             <div id="newItem" class="uti-icon" data-type="newitem">
                 <img width="0px" src="" data-resource="img/newitem.svg" alt="New item" />
@@ -29,7 +30,9 @@
 </header>
 
 <div class="main-container">
-    <div class="empty-element invisible"><h1>Empty</h1></div>
+    <div class="empty-element invisible">
+        <h1>Empty</h1>
+    </div>
     <div class="main-content invisible">
         <section class="card draggable" draggable="true">
             <div class="card-header">
@@ -62,17 +65,7 @@
 
     </div>
 </div>
-<div id="editButtons" class="edit-buttons invisible">
-    <div class="edit-btn" data-type="save" title="Save">
-        <img width="0px" src="" data-resource="img/save.svg" alt="Save">
-    </div>
-    <div class="edit-btn" data-type="cancel" title="Cancel">
-        <img width="0px" src="" data-resource="img/cancel.svg" alt="Cancel">
-    </div>
-    <div class="edit-btn" data-type="skip" title="Skip">
-        <img width="0px" src="" data-resource="img/skip.svg" alt="Skip">
-    </div>
-</div>
+
 <input type="file" accept="application/json" name="importedData" id="importedData" class="invisible" />
 <div id="feedbackMessage" class="feedback-message"></div>
 <div id="copyHint" class="copy-hint invisible">Copied!</div>
@@ -84,4 +77,21 @@
             <button id="noButton">No</button>
         </div>
     </dialog>
+</template>
+
+<template id="recordDialogTemplate">
+    <div class="dialog-overlay">
+        <div class="dialog-box">
+            <div class="dialog-header">
+                <input type="text" class="dialog-prompt-title" placeholder="Prompt Title" value="">
+            </div>
+            <div class="dialog-body-container">
+                <textarea class="dialog-body" placeholder="Prompt"></textarea>
+            </div>
+            <div class="dialog-footer">
+                <button class="js-cancel-btn btn">Cancel</button>
+                <button class="js-save-btn btn">Save</button>
+            </div>
+        </div>
+    </div>
 </template>

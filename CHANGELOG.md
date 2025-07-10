@@ -1,6 +1,14 @@
 # List of significant changes and bug fixes going back to version 1.1
 
-### Changes in version 1.21.12 - latest
+
+### Changes in version 1.21.15 - latest
+
+- New & Edit Card refactored
+- Redundant buttons and elements removed
+- Dialog box refactored to stay in the sidebar
+- Search box fixed
+
+### Changes in version 1.21.12
 
 - Card indexing was refactored
 - Dragging and dropping was reorganized according to the new indexing

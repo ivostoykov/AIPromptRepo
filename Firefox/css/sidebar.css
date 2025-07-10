@@ -22,12 +22,12 @@
     box-shadow: -15px 15px 10px gray;
 }
 
-.active-sidebar{
+.active-sidebar {
     right: 0 !important;
 }
 
 /* header related */
-.header{
+.header {
     padding-bottom: 2rem;
     width: 97%;
 }
@@ -61,19 +61,19 @@
     font-size: .85rem;
 }
 
-.app-icon{
+.app-icon {
     position: absolute;
     top: 62%;
     left: 50%;
     transform: translate(-50%, -62%);
     transition: top 0.5s ease;
 
-    &.behind{
+    &.behind {
         top: 30%
     }
 }
 
-.app-icon img{
+.app-icon img {
     width: 32px;
     height: auto;
 }
@@ -117,7 +117,7 @@
     width: 7vw;
 }
 
-.dropdown-menu div:hover{
+.dropdown-menu div:hover {
     background-color: #eeeded;
     border: 1px solid gray;
 }
@@ -128,12 +128,12 @@
     position: relative;
 }
 
-.search-icon-bordered{
+.search-icon-bordered {
     border: 1px solid blue;
     background-color: #FFF;
 }
 
-#searchBox {
+.search-box {
     width: 0;
     opacity: 0;
     transition: width 0.8s ease, opacity 0.8s ease;
@@ -141,9 +141,17 @@
     outline: none;
 }
 
-#searchBox.active {
+.search-box.active {
     width: 250px;
     opacity: 1;
+}
+
+.clear-search-box-btn {
+    cursor: pointer;
+    font-size: 18px;
+    user-select: none;
+    display: block;
+    margin-right: 5px;
 }
 
 .search-icon,
@@ -208,7 +216,7 @@
     padding: 15px;
 }
 
-.card-expanded > .card-header{
+.card-expanded>.card-header {
     padding-bottom: 15px;
     border-bottom: 1px solid black;
 }
@@ -236,7 +244,7 @@
     white-space: break-spaces;
 }
 
-.card-field-editable{
+.card-field-editable {
     cursor: text;
     border: 1px solid #ccc;
     padding: 10px;
@@ -262,11 +270,11 @@
     background-color: transparent;
     transition: transform 0.5s ease-out, left 0.5s ease-out;
 
-    &:hover{
+    &:hover {
         background-color: transparent !important;
     }
 
-    &.is-open{
+    &.is-open {
         transform: rotate(90deg);
         left: -12px;
     }
@@ -299,10 +307,10 @@
     opacity: 0.3;
 }
 
-.initial-load{
+.initial-load {
     width: 1px;
     height: 1px;
-    position:absolute;
+    position: absolute;
     top: -10000px;
     left: -10000px;
     z-index: inherit;
@@ -311,12 +319,12 @@
     opacity: 0;
 }
 
-.img-btn{
+.img-btn {
     width: 50px;
     height: 50px;
 }
 
-hr{
+hr {
     margin: 0 5px;
     border: 1px solid lightgray;
     color: inherit;
@@ -336,7 +344,7 @@ hr{
     transition: all 0.4s ease;
 }
 
-.feedback-message-slide{
+.feedback-message-slide {
     bottom: 0;
 }
 
@@ -357,7 +365,7 @@ hr{
 }
 
 /* Hints */
-.copy-hint{
+.copy-hint {
     position: fixed;
     background-color: #333;
     color: #fff;
@@ -401,18 +409,22 @@ hr{
 
 .edit-buttons div {
     cursor: pointer;
-    padding: 5px 10px; /* Adjust padding as needed */
-    background-color: #f0f0f0; /* Light grey background, change as needed */
-    border-radius: 5px; /* Optional: adds rounded corners */
+    padding: 5px 10px;
+    /* Adjust padding as needed */
+    background-color: #f0f0f0;
+    /* Light grey background, change as needed */
+    border-radius: 5px;
+    /* Optional: adds rounded corners */
 }
 
 .edit-buttons div:hover {
-    background-color: #e0e0e0; /* Slightly darker grey on hover, change as needed */
+    background-color: #e0e0e0;
 }
 
-/* dialog */
+/* dialogs */
 dialog {
-    background-color: yellow;
+    position: absolute;
+    background-color: #ffefef;
     height: 100px;
     min-width: fit-content;
     width: 350px;
@@ -427,20 +439,20 @@ dialog {
     transform: translate(-50%, -30%);
 }
 
-.dialog-content{
+.dialog-content {
     flex-grow: 1;
     text-align: center;
     display: flex;
     justify-content: space-around;
 }
 
-.dialog-buttons{
+.dialog-buttons {
     display: flex;
     flex-direction: row;
     justify-content: space-around;
 }
 
-dialog button{
+dialog button {
     width: 30%;
     height: 30px;
     border-radius: 7px;
@@ -448,8 +460,80 @@ dialog button{
     box-shadow: 2px 2px lightgray;
 }
 
-dialog button:active{
+dialog button:active {
     box-shadow: none;
+}
+
+/* recor dialog */
+
+.dialog-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.4);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.dialog-box {
+    background: #fff;
+    border-radius: 6px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    width: 75%;
+    max-width: 90%;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    max-height: 75vh;
+    height: 45%;
+}
+
+.dialog-header {
+    font-weight: bold;
+    font-size: 1.2rem;
+    padding: 2rem 0;
+    border-bottom: 1px solid #aaa;
+}
+
+.dialog-header .dialog-prompt-title {
+    width: 100%;
+}
+
+.dialog-body-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.dialog-body {
+    width: 100%;
+    min-height: 100px;
+    flex: 1;
+    resize: none;
+}
+
+.dialog-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    padding: 2rem 0;
+    border-top: 1px solid #aaa;
+}
+
+.btn {
+    min-width: 100px;
+    padding: 15px;
+    width: 15rem;
+}
+
+.btn:hover {
+    background-color: #999;
+    color: #fff;
 }
 
 /* draggable */
@@ -458,8 +542,8 @@ dialog button:active{
     cursor: move;
 
     &.is-dragging {
-      opacity: 0.5;
-      border: 1px solid red;
+        opacity: 0.5;
+        border: 1px solid red;
     }
 }
 
@@ -469,10 +553,13 @@ dialog button:active{
 }
 
 @keyframes colorCycle {
-    0%, 100% {
+
+    0%,
+    100% {
         background-color: inherit;
         border: inherit;
     }
+
     15% {
         background-color: #ccf8b2;
         border: 1px solid red;

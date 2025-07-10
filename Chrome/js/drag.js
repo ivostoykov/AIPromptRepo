@@ -46,7 +46,7 @@ function iniDrag() {
             const afterElement = getDragAfterElement(zone, e.clientY);
             const theSideBar = getSideBar();
             const draggable = theSideBar.querySelector(".is-dragging");
-            if(!draggable) {  return;  }
+            if (!draggable) { return; }
 
             if (afterElement === null) {
                 zone.appendChild(draggable);
@@ -58,15 +58,15 @@ function iniDrag() {
 }
 
 async function reorderRepoData() {
-  const theSideBar = getSideBar();
-  const repoData = await getRepoData();
-  const newOrder = [];
+    const theSideBar = getSideBar();
+    const repoData = await getRepoData();
+    const newOrder = [];
 
-  theSideBar.querySelectorAll(".main-content .card").forEach(card => {
-    const id = card.getAttribute("data-index");
-    const item = repoData.find(el => el.id === id);
-    if (item) {  newOrder.push(item);  }
-  });
+    theSideBar.querySelectorAll(".main-content .card").forEach(card => {
+        const id = card.getAttribute("data-index");
+        const item = repoData.find(el => el.id === id);
+        if (item) { newOrder.push(item); }
+    });
 
-  await updateData(newOrder, false);
+    await updateData(newOrder, false);
 }

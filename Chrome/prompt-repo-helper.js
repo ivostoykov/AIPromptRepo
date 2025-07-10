@@ -12,14 +12,14 @@ Array.prototype.loaded = false;
 
 if (document.readyState !== 'loading') {
   init()
-  .then(async resp => {
-    await initSidebar()
-    await populateData();
-    iniDrag();
-  })
-  .catch(e => {
-    console.error(`${manifest.name} - [${getLineNumber()}]: Init error:`, e);
-  });
+    .then(async resp => {
+      await initSidebar()
+      await populateData();
+      iniDrag();
+    })
+    .catch(e => {
+      console.error(`${manifest.name} - [${getLineNumber()}]: Init error:`, e);
+    });
 } else {
   document.addEventListener('DOMContentLoaded', async e => {
     try {
@@ -33,7 +33,7 @@ if (document.readyState !== 'loading') {
 }
 
 chrome.runtime.onMessage.addListener(async function (request, sender, sendResponse) {
-  switch (request.action){
+  switch (request.action) {
     case 'optionsChanged':
       await init();
       break;
@@ -43,20 +43,20 @@ chrome.runtime.onMessage.addListener(async function (request, sender, sendRespon
   }
 });
 
-function getExtURL(resourceRelativePath){
+function getExtURL(resourceRelativePath) {
   return chrome.runtime.getURL(resourceRelativePath)
 }
 
 function getStyle(cssFile) {
   const linkElem = document.createElement("link");
   linkElem.setAttribute("rel", "stylesheet");
-  if(cssFile)  {
+  if (cssFile) {
     linkElem.setAttribute("href", chrome.runtime.getURL(cssFile));
   }
-    return linkElem;
+  return linkElem;
 };
 
-async function buildMainButton(){
+async function buildMainButton() {
   const repoOptions = await getOptionsFromStorage();
   const theMainButton = Object.assign(document.createElement('div'), {
     id: "mainButton",
@@ -70,7 +70,7 @@ async function buildMainButton(){
     img.width = "0px";
     img.src = chrome.runtime.getURL(el);
     img.classList.add('img-btn');
-    if(i === 1){
+    if (i === 1) {
       img.classList.add('invisible');
     }
     theMainButton.appendChild(img);
@@ -83,13 +83,11 @@ async function buildMainButton(){
   }, true);
 
   theMainButton.addEventListener('mouseenter', (e) => {
-    // if(!timerId){
-      animateMainButton(theMainButton, true);
-    // }
+    animateMainButton(theMainButton, true);
   });
 
   theMainButton.addEventListener('mouseleave', (e) => {
-      animateMainButton(theMainButton, false);
+    animateMainButton(theMainButton, false);
   });
 
   return theMainButton;
@@ -114,38 +112,36 @@ async function initSidebar() {
     theSideBar.querySelector('.dropdown-menu')?.classList.toggle('invisible');
   });
 
-  theSideBar.querySelector('#menuOptions').addEventListener('click', function(e) {
-    chrome.runtime.sendMessage({action: "openOptionsPage"});
+  theSideBar.querySelector('#menuOptions').addEventListener('click', function (e) {
+    if (!chrome.runtime.id) {
+      showMessage('Please reload the tab because has been disconnected.');
+      console.debug(`${manifest?.name} - [${getLineNumber()}] - chrome.runtime.id is missing - perhaps an update is  pending or was applied.`);
+      return;
+    }
+    chrome.runtime.sendMessage({ action: "openOptionsPage" });
     theSideBar.querySelector('.dropdown-menu')?.classList.toggle('invisible');
   });
 
   theSideBar.querySelectorAll('.card-header')?.forEach(el => {
-      el.addEventListener('click', onCardHeaderClick);
+    el.addEventListener('click', onCardHeaderClick);
   });
 
-  theSideBar.querySelector('#searchBoxContainer img')?.addEventListener('click', function(e) {
-      e.stopPropagation();
-      const searchContainer = theSideBar.querySelector('#searchBoxContainer');
-      var searchBox = theSideBar.querySelector('#searchBox');
-      if (!searchBox) {  return;  }
-      if (searchBox.classList.contains('active')) {
-        searchBox.classList.remove('active');
-        searchBox.value = '';
-        searchBox.dispatchEvent( new Event('input'));
-        searchContainer.classList.remove('search-icon-bordered');
-      } else {
-        searchBox.classList.add('active');
-        searchBox.focus();
-        searchContainer.classList.add('search-icon-bordered');
-      }
+  const searchBox = theSideBar.querySelector('#searchBox');
+  searchBox?.addEventListener('click', e => {
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    e.preventDefault();
   });
 
-  theSideBar.querySelector('#searchBox').addEventListener('input', (e) => {
-    handleInput(e);
+  searchBox?.addEventListener('input', e => {
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    e.preventDefault();
+    searBoxInputEventHandler(e);
   })
 
   theSideBar.addEventListener('mouseenter', (e) => {
-      animateMainButton(theSideBar.querySelector('.app-icon'), true);
+    animateMainButton(theSideBar.querySelector('.app-icon'), true);
   });
 }
 
@@ -162,11 +158,11 @@ async function buildSidebarAndFetchContent(sidebarLoadedCallback) {
     theSideBar.querySelectorAll('img').forEach(img => {
       const resource = img.getAttribute('data-resource');
       img.src = getExtURL(resource);
-      if(resource.lastIndexOf('sendto') > -1 && currentPageTitle){
+      if (resource.lastIndexOf('sendto') > -1 && currentPageTitle) {
         img.alt = img.alt.replace("current page", `${currentPageTitle}`)
         img.parentElement.title = img.parentElement.title.replace("current page", `${currentPageTitle}`);
       }
-      img.addEventListener('click', async e => await onRibbonButtonClick(e));
+      img.addEventListener('click', async e => await onRibbonButtonClick(e), true);
     });
 
     theSideBar.addEventListener('click', function (e) {
@@ -180,22 +176,21 @@ async function buildSidebarAndFetchContent(sidebarLoadedCallback) {
       sidebarLoadedCallback();
     }
 
-    // await initSidebar();
     return theSideBar;
   } catch (error) {
     return console.error(`${manifest.name} - [${getLineNumber()}]: Error loading the HTML:`, error);
   }
 }
 
-function handleInput(e){
+function searBoxInputEventHandler(e) {
   const theSideBar = getSideBar();
   const searchBox = e.target || theSideBar.querySelector('#searchBox');
-  if(!searchBox){  return;  }
+  if (!searchBox) { return; }
   const cards = theSideBar.querySelectorAll('.card');
-  if(cards.length < 1){  return;  }
+  if (cards.length < 1) { return; }
 
   let searchString = searchBox.value.trim().toLowerCase();
-  if(!searchString){
+  if (!searchString) {
     cards.forEach(card => card.classList.remove('invisible'));
     return;
   }
@@ -203,7 +198,7 @@ function handleInput(e){
   cards.forEach(card => {
     const title = card.querySelector('.card-title');
     const body = card.querySelector('.card-body');
-    if(title.textContent.toLowerCase().indexOf(searchString) < 0 && body.textContent.toLowerCase().indexOf(searchString) < 0){
+    if (title.textContent.toLowerCase().indexOf(searchString) < 0 && body.textContent.toLowerCase().indexOf(searchString) < 0) {
       card.classList.add('invisible');
     }
   });
@@ -211,20 +206,22 @@ function handleInput(e){
 
 async function init() {
   document.addEventListener('click', async e => {
+    const theShadowRoot = getShadowRoot();
+    if (theShadowRoot.querySelector('.dialog-overlay.active')) { return; }
     const repoOptions = await getOptionsFromStorage();
-    if(!repoOptions?.closeOnClickOut){  return;  }
-    if(!theShadowRoot) {  return;  }
-    if(!e.composedPath().includes(theShadowRoot.host)){
+    if (!repoOptions?.closeOnClickOut) { return; }
+    if (!theShadowRoot) { return; }
+    if (!e.composedPath().includes(theShadowRoot.host)) {
       await swapSidebarWithButton();
     }
     return;
   });
   const shouldContinue = await checkIfUrlAllowed();
-  if(shouldContinue){
-    if (document.querySelector('ai-prompt-repo')) {  return;  }
+  if (shouldContinue) {
+    if (document.querySelector('ai-prompt-repo')) { return; }
   } else {
     const aiProptRepo = document.querySelector('ai-prompt-repo');
-    if(aiProptRepo){
+    if (aiProptRepo) {
       aiProptRepo.remove();
     }
     return;
@@ -246,22 +243,22 @@ async function init() {
   }
 }
 
-async function checkIfUrlAllowed(){
+async function checkIfUrlAllowed() {
   try {
-      const repoOptions = await getOptionsFromStorage();
-      const urls = repoOptions?.allowedUrls?.split(/[;,\n]+/)?.filter(Boolean) || [];
-      if(urls.length < 1 || urls[0].trim() === '*'){  return true;  }
-      return urls.some(el => el.includes(location.hostname) || location.hostname.includes(el));
-    } catch (err) {
-      console.error(`${manifest.name}: Error`, err);
-      return false;
-    }
+    const repoOptions = await getOptionsFromStorage();
+    const urls = repoOptions?.allowedUrls?.split(/[;,\n]+/)?.filter(Boolean) || [];
+    if (urls.length < 1 || urls[0].trim() === '*') { return true; }
+    return urls.some(el => el.includes(location.hostname) || location.hostname.includes(el));
+  } catch (err) {
+    console.error(`${manifest.name}: Error`, err);
+    return false;
+  }
 }
 
 function onCardHeaderClick(e) {
   const theSideBar = getSideBar();
-  if(theSideBar.querySelector('.card-field-editable')){
-      return;
+  if (theSideBar.querySelector('.card-field-editable')) {
+    return;
   }
   const card = e.target.closest('.card');
   const cardBody = card.querySelector('.card-body');
@@ -270,16 +267,16 @@ function onCardHeaderClick(e) {
   colapseAllCardBodies();
   removeCardEditableAttribute();
   if (isCardInVisible) {
-      card.classList.add('card-selected', 'card-expanded');
-      card.classList.remove('draggable');
-      card.removeAttribute('draggable')
-      cardBody.classList.remove('invisible');
-      card.querySelector('.expander').classList.add('is-open');
+    card.classList.add('card-selected', 'card-expanded');
+    card.classList.remove('draggable');
+    card.removeAttribute('draggable')
+    cardBody.classList.remove('invisible');
+    card.querySelector('.expander').classList.add('is-open');
   } else {
-      card.classList.remove('card-selected', 'card-expanded');
-      card.classList.add('draggable');
-      card.setAttribute('draggable', 'ture');
-      card.querySelector('.expander').classList.remove('is-open');
+    card.classList.remove('card-selected', 'card-expanded');
+    card.classList.add('draggable');
+    card.setAttribute('draggable', 'ture');
+    card.querySelector('.expander').classList.remove('is-open');
   }
 }
 
@@ -293,9 +290,9 @@ function swapButtonWithSidebar() {
 async function swapSidebarWithButton() {
   const theSideBar = getSideBar();
   const theMainButton = getMainButton();
-  if(!theMainButton)  {  return;  }
+  if (!theMainButton) { return; }
   const repoOptions = await getOptionsFromStorage()
-  if(repoOptions.showEmbeddedButton){
+  if (repoOptions.showEmbeddedButton) {
     theMainButton.classList.remove('invisible');
   }
   theSideBar.classList.remove('active-sidebar');
@@ -314,39 +311,38 @@ async function populateData() {
   cardContainer.innerHTML = '';
 
   if ((repoData || []).length === 0) {
-      emptyElement.classList.remove('invisible');
-      theSideBar.querySelector('.main-content')?.classList.add('invisible');
-      cardContainer.appendChild(card);
-      return;
+    emptyElement.classList.remove('invisible');
+    theSideBar.querySelector('.main-content')?.classList.add('invisible');
+    cardContainer.appendChild(card);
+    return;
   }
 
   emptyElement.classList.add('invisible');
   theSideBar.querySelector('.main-content')?.classList.remove('invisible');
 
   (repoData || []).forEach((rec) => {
-      const newCard = card.cloneNode(true);
-      newCard.setAttribute('data-index', `${rec.id}`); // TODO: remove later and use data-id instead
-      // newCard.setAttribute('data-id', `${rec.id}`);
-      newCard.querySelectorAll('.invisible').forEach(invisible => invisible.classList.remove('invisible'));
+    const newCard = card.cloneNode(true);
+    newCard.setAttribute('data-index', `${rec.id}`);
+    newCard.querySelectorAll('.invisible').forEach(invisible => invisible.classList.remove('invisible'));
 
-      newCard.querySelectorAll('.card-btn')?.forEach(btn => {
-          btn.addEventListener('click', async e => await onRibbonButtonClick(e));
-      });
+    newCard.querySelectorAll('.card-btn')?.forEach(btn => {
+      btn.addEventListener('click', async e => await onRibbonButtonClick(e), true);
+    });
 
-      const titleEl = newCard.querySelector('.card-title');
-      if (titleEl) {
-          titleEl.textContent = rec.title || '';
-          titleEl.setAttribute('data-index', `${rec.id}`);
-      }
+    const titleEl = newCard.querySelector('.card-title');
+    if (titleEl) {
+      titleEl.textContent = rec.title || '';
+      titleEl.setAttribute('data-index', `${rec.id}`);
+    }
 
-      const bodyEl = newCard.querySelector('.card-body');
-      if (bodyEl) {
-          bodyEl.innerHTML = rec.body?.replace(/\n/g, '<br/>');
-          bodyEl.setAttribute('data-index', `${rec.id}`);
-          bodyEl.classList.add('invisible');
-      }
+    const bodyEl = newCard.querySelector('.card-body');
+    if (bodyEl) {
+      bodyEl.innerHTML = rec.body?.replace(/\n/g, '<br/>');
+      bodyEl.setAttribute('data-index', `${rec.id}`);
+      bodyEl.classList.add('invisible');
+    }
 
-      cardContainer.appendChild(newCard);
+    cardContainer.appendChild(newCard);
   });
 }
 
@@ -355,56 +351,100 @@ async function onRibbonButtonClick(e) {
   e.preventDefault();
   const theSideBar = getSideBar();
   const clickedButton = e.composedPath().find(el => el.getAttribute?.("data-type"));
-  // const clickedButton = e.composedPath().find(el => el.classList?.contains("menu-button"));
   const type = clickedButton.dataset?.type?.toLowerCase();
   if (!type) { return; }
   switch (type) {
-      case 'close':
-        animateMainButton(theSideBar.querySelector('.app-icon'), false);
-        await swapSidebarWithButton(e);
-        break;
-      case 'copy':
-          await copyDataItemContent(e, clickedButton.closest('.card'));
-          break;
-      case 'edit':
-          await editCard(e, clickedButton.closest('.card'));
-          break;
-      case 'sendto':
-          await sendTo(e, clickedButton.closest('.card'));
-          break;
-      case 'sendtorun':
-          await sendTo(e, clickedButton.closest('.card'), true);
-          break;
-      case 'delete':
-          await deleteCard(e, clickedButton.closest('.card'));
-          break;
-      case 'save':
-          await saveEdit(e);
-          break;
-      case 'skip':
-        await skipEdit(e);
-        break;
-      case 'cancel':
-        await cancelEdit(e);
-        break;
-      case 'newitem':
-        await onNewItemClicked(e);
-        break;
-      case 'options':
-        theSideBar.querySelector('.dropdown-menu')?.classList.toggle('invisible');
-        break;
-      case 'search':
-        setTimeout(e => theSideBar.querySelector('.app-icon')?.classList.toggle('behind'), 250);
-        break;
-      case "expand":
-        onCardHeaderClick(e);
-        break;
-      default:
-        showMessage(`Unknown type ${type}`);
+    case 'close':
+      animateMainButton(theSideBar.querySelector('.app-icon'), false);
+      await swapSidebarWithButton(e);
+      break;
+    case 'copy':
+      await copyDataItemContent(e, clickedButton.closest('.card'));
+      break;
+    case 'edit':
+      await editCard(e, clickedButton.closest('.card'));
+      break;
+    case 'sendto':
+      await sendTo(e, clickedButton.closest('.card'));
+      break;
+    case 'sendtorun':
+      await sendTo(e, clickedButton.closest('.card'), true);
+      break;
+    case 'delete':
+      await deleteCard(e, clickedButton.closest('.card'));
+      break;
+    case 'newitem':
+      onNewItemClicked(e);
+      break;
+    case 'options':
+      theSideBar.querySelector('.dropdown-menu')?.classList.toggle('invisible');
+      break;
+    case 'search':
+      onSearchClick(e);
+      break;
+    case "expand":
+      onCardHeaderClick(e);
+      break;
+    default:
+      showMessage(`Unknown type ${type}`);
+  }
+}
+
+function onSearchClick(e) {
+  e.stopPropagation();
+  const theSideBar = getSideBar();
+  const clickedEl = (e.currentTarget || e.target);
+  const action = clickedEl.tagName === 'IMG' ? 'open' : 'close';
+  const searchContainer = theSideBar?.querySelector('#searchBoxContainer');
+  const searchBtn = searchContainer.querySelector('img');
+  const searchBox = theSideBar?.querySelector('#searchBox');
+  const clearBtn = theSideBar?.querySelector('#clearSearchBoxBtn');
+
+  setTimeout(e => theSideBar.querySelector('.app-icon')?.classList.toggle('behind'), 250);
+
+  if (!searchBox || !clearBtn) {
+    console.error(`${manifest?.name} - [${getLineNumber()}] - Search elements not found!`, e.target, e.currentTarget);
+    return;
+  }
+
+  switch (action) {
+    case 'open':
+      searchBox.classList.add('active');
+      searchBox.focus();
+      clearBtn?.classList.remove('invisible');
+      searchBtn?.classList.add('invisible');
+      clearBtn.onclick = (e) => onSearchClick(e);
+      searchContainer.classList.add('search-icon-bordered');
+      break;
+    case 'close':
+      searchBox.classList.remove('active');
+      searchBox.value = '';
+      searchBox.dispatchEvent(new Event('input'));
+      clearBtn.classList.add('invisible');
+      searchBtn?.classList.remove('invisible');
+      clearBtn.onclick = null;
+      searchContainer.classList.remove('search-icon-bordered');
+      break;
+
+    default:
+      console.error(`${manifest?.name} - [${getLineNumber()}] - Unknkown action - ${action}!`, e.target, e.currentTarget);
+      break;
   }
 }
 
 function onNewItemClicked(e) {
+  showRecordDialog({
+    id: null,
+    title: null,
+    content: null,
+    onSave: async (data) => {
+      await saveEdit(data);
+    }
+  });
+}
+
+function createNewCard(card) {
+  const { id, title, body } = card;
   const theSideBar = getSideBar();
   const emptyElement = theSideBar.querySelector('.empty-element');
   if (!emptyElement.classList.contains('invisible')) {
@@ -416,179 +456,110 @@ function onNewItemClicked(e) {
     mainContent.classList.remove('invisible');
   }
 
-  const card = mainContent?.querySelector('.card');
-  if (!card) {
+  const cardTemplate = mainContent?.querySelector('.card');
+  if (!cardTemplate) {
     showMessage('No card found', 'error');
     return;
   }
 
-  const newCard = normaliseCard(card.cloneNode(true));
-  newCard.classList.add('card-selected', 'card-expanded');
-  newCard.setAttribute('data-card-type', 'new');
-  newCard.classList.remove('draggable');
-  newCard.removeAttribute('draggable');
-  newCard.querySelector('.expander')?.classList.add('invisible')
+  const newCard = normaliseCard(cardTemplate.cloneNode(true));
+  newCard.dataset.index = id;
 
   const newCardTitle = newCard.querySelector('.card-title');
-  newCardTitle.setAttribute('contenteditable', 'true');
-  newCardTitle.classList.add('card-field-editable');
-  newCard.querySelector('.card-header').addEventListener('click', onCardHeaderClick); //TODO: Check for problems calling this one
+  newCardTitle.dataset.index = id;
+  newCardTitle.textContent = title;
+
+  const newCardBody = newCard.querySelector('.card-body');
+  newCardBody.textContent = body;
+  newCardBody.dataset.index = id;
 
   mainContent.appendChild(newCard);
-  // iniDrag();
-  theSideBar.querySelector('#editButtons').classList.remove('invisible');
   newCardTitle.focus();
 }
 
 async function editCard(e, cardOriginator) {
   if (!cardOriginator) {
-      showMessage('Unknown item!', 'error');
-      return;
-  }
-
-  const repoData = await getRepoData();
-  cardOriginator.classList.remove('draggable');
-  cardOriginator.querySelector('.expander').classList.add('invisible');
-  cardOriginator.querySelectorAll('.invisible:not(.expander)').forEach(el => el.classList.remove('invisible'));
-
-  cardOriginator.classList.add('card-selected', 'card-expanded');
-  const cardTitle = cardOriginator.querySelector('.card-title');
-  const cardIndex = cardOriginator.dataset.index;
-  // const cardIndex = parseInt(cardOriginator.getAttribute('data-index'), 10);
-  if(!cardIndex) {
-    showMessage(`Can't find the card ${cardIndex}`, 'error');
+    showMessage('Unknown item!', 'error');
     return;
   }
 
-  cardOriginator.querySelector('.card-body').classList.add('dimmed');
-  cardOriginator.querySelector('.card-body').innerHTML = repoData?.find(el => el.id = cardIndex)?.body.replace(/\n/g, '<br/>');
-  cardTitle.setAttribute('contenteditable', 'true');
-  cardTitle.classList.add('card-field-editable');
-  cardTitle.focus();
-
-  const theSideBar = getSideBar();
-  const editRibbon = theSideBar.querySelector('#editButtons');
-  editRibbon.classList.remove('edit-buttons-title', 'edit-buttons-body', 'invisible');
-  editRibbon.classList.add(cardTitle ? 'edit-buttons-title' : 'edit-buttons-body');
-}
-
-async function skipEdit(e){
-  await saveEdit(e, true);
-}
-
-async function saveEdit(e, skip = false){
-  const theSideBar = getSideBar();
-  const editRibbon = theSideBar.querySelector('#editButtons');
-  const editedCard = theSideBar.querySelector('.card.card-expanded');
-  const editedEl = theSideBar.querySelector('.card-field-editable');
-  const editedContent = editedEl.innerText;
-
-  if(editedContent.trim() === ''){
-    normaliseFieldsAndButtons(editedEl, editRibbon);
+  const cardIndex = cardOriginator?.dataset?.index;
+  if (!cardIndex) {
+    console.error(`${manifest?.name} - [${getLineNumber()}]: card index is empty or not found!`, cardOriginator);
+    showMessage('Missing card index!', 'error');
     return;
   }
 
   const repoData = await getRepoData();
-  let needsUpdate = false;
-  const titleEl = editedEl.closest('.card').querySelector('.card-title');
-  const isTitle = editedEl.classList.contains('card-title');
-  const promptId = titleEl.getAttribute('data-index');
+  const theCard = repoData.find(el => el.id === cardIndex);
+  showRecordDialog({
+    id: cardIndex,
+    title: theCard?.title,
+    content: theCard.body,
+    onSave: async (data) => {
+      await saveEdit(data);
+    }
+  });
 
-  if(!skip){
-    editedEl.innerHTML = editedContent.replace(/\n/g, '<br/>');
-  }
-  editedEl.removeAttribute('contenteditable');
-  editedEl.classList.remove('card-field-editable')
+  return;
+}
 
-  if (isTitle && !skip) {
-      needsUpdate = true;
-      if(promptId) {
-        const repoDataRecordIndex = repoData.findIndex(el => el.id === promptId);
-        if(repoDataRecordIndex > -1){
-          repoData[repoDataRecordIndex].title = editedContent;
-        } else {
-          showMessage(`Failed to find a record with id ${promptId}`, "error");
-        }
-      } else {
-        const newId = crypto.randomUUID();
-        repoData.push({"id": newId, "title": editedContent, "body": ''});
-        titleEl.setAttribute('data-index', newId);
-      }
-  }
-
-  if (!isTitle && promptId && !skip) {
-      const repoDataRecordIndex = repoData.findIndex(el => el.id === promptId);
-      repoData[repoDataRecordIndex].body = editedContent;
-      needsUpdate = true;
-      editedEl.setAttribute('data-index', promptId);
-  }
-
-    if(needsUpdate && !skip) {
-      updateData(repoData, !isTitle);
-  }
-
-  if(isTitle){
-      prepareNextToEdit(editedEl, editRibbon);
+async function saveEdit(card) {
+  const { id, title, body } = card;
+  let repoData = await getRepoData();
+  const recIndex = repoData.findIndex(el => el.id === id);
+  if (recIndex < 0) {
+    repoData.push({ id, title, body });
   } else {
-      editedCard?.classList.add('draggable');
-      editedCard.setAttribute('draggable', true);
-      editedCard.dataset.index = promptId
-      normaliseFieldsAndButtons(editedEl, editRibbon);
-      iniDrag();
+    repoData[recIndex] = { id, title, body };
   }
-  theSideBar.querySelectorAll('.dimmed').forEach(el => el.classList.remove('dimmed'));
+
+  const res = await setRepoData(repoData);
+  if (res) {
+    showMessage(`${title} saved.`, 'success');
+    updateCardElement(card);
+    console.log(`${manifest?.name} - [${getLineNumber()}]: Saved`, id, title);
+  } else {
+    showMessage(`Failed to save ${title}!`, 'error');
+    console.log(`${manifest?.name} - [${getLineNumber()}]: NOT Saved`, id, title);
+  }
 }
 
-async function cancelEdit(){
+function updateCardElement(card) {
+  const { id, title, body } = card;
   const theSideBar = getSideBar();
-  const editedEl = theSideBar.querySelector('.card-field-editable');
-  if(removedAsNew(editedEl.closest('.card'))){
-    return;
-  }
-  const editRibbon = theSideBar.querySelector('#editButtons');
-  theSideBar.querySelectorAll('.dimmed').forEach(el => el.classList.remove('dimmed'));
+  const theCardEl = theSideBar.querySelector(`[data-index="${id}"]`);
+  if (!theCardEl) { return createNewCard(card); }
 
-  if(!editedEl){
-      editRibbon.classList.remove('edit-buttons-body', 'edit-buttons-title');
-      editRibbon.classList.add('invisible');
-      return;
-  }
-
-  const repoData = await getRepoData();
-  const titleEl = editedEl.closest('.card').querySelector('.card-title');
-  const promptId = titleEl.dataset.index;
-  const repoDataRecord = repoData.find(el => el.id === promptId);
-
-  const isTitle = editedEl.classList.contains('card-title');
-  editedEl.innerHTML = repoDataRecord[isTitle ? 'title' : 'body'].replace(/\n/g, '<br/>');
-  editedEl.removeAttribute('contenteditable');
-  editedEl.classList.remove('card-field-editable');
-  if(isTitle){
-      prepareNextToEdit(editedEl, editRibbon);
-  } else {
-      normaliseFieldsAndButtons(editedEl, editRibbon);
+  try {
+    theCardEl.querySelector('.card-title').textContent = title;
+    theCardEl.querySelector('.card-body').textContent = body;
+  } catch (err) {
+    console.error(`${manifest?.name} - [${getLineNumber()}]: ${err.message}`, err);
   }
 }
 
 async function deleteCard(e, cardOriginator) {
+  e.preventDefault();
+  e.stopPropagation();
   let response;
+  const title = cardOriginator.querySelector('.card-title')?.textContent || 'this card';
   try {
-    response = showDialog('This is a test dialog message');
-    if (!response) {  return;  }
+    response = await showDialog(`Delete ${title}?`);
+    if (!response) { return; }
     await onDeleteConfirmation(e, cardOriginator);
   } catch (error) {
     console.error(`${manifest.name} - [${getLineNumber()}] - Error occurred with response`, error, response);
   }
 }
 
-async function onDeleteConfirmation(e, cardOriginator){
+async function onDeleteConfirmation(e, cardOriginator) {
   if (!cardOriginator) {
     console.error(`${manifest.name} - [${getLineNumber()}] - Error occurred with response`, cardOriginator);
     showMessage('Unknown item!', 'error');
     return;
   }
 
-  // const title = cardOriginator.querySelector('.card-title');
   const promptId = cardOriginator.dataset.index;
   if (!promptId) {
     console.error(`${manifest.name} - [${getLineNumber()}] - Prompt Id is missing or not found (${promptId})!`);
@@ -598,18 +569,19 @@ async function onDeleteConfirmation(e, cardOriginator){
 
   const repoData = await getRepoData();
   const index = repoData.findIndex(el => el.id === promptId);
-  if(index < 0){
+  if (index < 0) {
     console.log(`${manifest.name} - [${getLineNumber()}] No prompt id with a value ${promptId} was found!`, repoData);
     return;
   }
-      repoData.splice(index, 1);
-      await updateData(repoData);
+
+  repoData.splice(index, 1);
+  await updateData(repoData);
 }
 
-function removedAsNew(card){
-  if(!card) {  return false;  }
+function removedAsNew(card) {
+  if (!card) { return false; }
   const isNew = card.getAttribute('data-card-type') === 'new';
-  if(!isNew) {  return false;  }
+  if (!isNew) { return false; }
   const theSideBar = getSideBar();
   theSideBar.querySelector('#editButtons').classList.add('invisible');
 
@@ -628,7 +600,7 @@ async function updateData(objData, rebuild = true) {
   }
 }
 
-function prepareNextToEdit(editedEl, editRibbon){
+function prepareNextToEdit(editedEl, editRibbon) {
   editRibbon.classList.remove('edit-buttons-title', 'edit-buttons-body', 'invisible');
   editRibbon.classList.add('edit-buttons-body');
   const nextToEdit = editedEl.closest('.card').querySelector('.card-body');
@@ -638,7 +610,7 @@ function prepareNextToEdit(editedEl, editRibbon){
   nextToEdit.focus();
 }
 
-function normaliseFieldsAndButtons(editedEl, editRibbon){
+function normaliseFieldsAndButtons(editedEl, editRibbon) {
   const theSideBar = getSideBar();
   theSideBar.querySelectorAll('.card-expanded').forEach(el => el.classList.remove('card-expanded'));
   theSideBar.querySelectorAll('.card-selected').forEach(el => el.classList.remove('card-selected'));
@@ -649,13 +621,13 @@ function normaliseFieldsAndButtons(editedEl, editRibbon){
   editedEl.closest('.card').querySelector('.expander').classList.remove('invisible');
 }
 
-function getInputElement(){
+function getInputElement() {
   let receiver = document.querySelector('#prompt-textarea') || document.querySelector('div.textarea') || document.querySelector('textarea');
-  if(!receiver){
+  if (!receiver) {
     receiver = document.activeElement;
     if (!receiver || !(receiver.tagName === 'INPUT' ||
-        receiver.tagName === 'TEXTAREA' || receiver.isContentEditable)) {
-          receiver = false;
+      receiver.tagName === 'TEXTAREA' || receiver.isContentEditable)) {
+      receiver = false;
     }
   }
   return receiver;
@@ -663,14 +635,14 @@ function getInputElement(){
 
 async function sendTo(e, cardOriginator, run = false) {
   if (!cardOriginator) {
-      showMessage('Unknown item!', 'error');
-      return;
+    showMessage('Unknown item!', 'error');
+    return;
   }
 
   const promptTextarea = getInputElement();
   if (!promptTextarea) {
-      showMessage('Failed to find where to send data to.', 'error');
-      return;
+    showMessage('Failed to find where to send data to.', 'error');
+    return;
   }
 
   const body = cardOriginator.querySelector('.card-body');
@@ -679,17 +651,17 @@ async function sendTo(e, cardOriginator, run = false) {
     showMessage(`Prompt Id is missing or empty (${promptId.toString()})!`);
     return;
   }
-      if (promptTextarea) {
-        await injectPromptBody(promptTextarea, promptId);
+  if (promptTextarea) {
+    await injectPromptBody(promptTextarea, promptId);
 
-        if (run) {
-          runPrompt();
-        }
-      }
+    if (run) {
+      runPrompt();
+    }
+  }
 
   const repoOptions = await getOptionsFromStorage();
-  if(repoOptions && repoOptions.closeOnSendTo){
-      await swapSidebarWithButton();
+  if (repoOptions && repoOptions.closeOnSendTo) {
+    await swapSidebarWithButton();
   }
 }
 
@@ -730,8 +702,8 @@ function runPrompt() {
   }
 }
 
-function dispatchInputEvent(originator, data = ''){
-  if(!originator)  {  return;  }
+function dispatchInputEvent(originator, data = '') {
+  if (!originator) { return; }
   const inputEvent = new InputEvent('input', {
     bubbles: true,
     cancelable: true,
@@ -739,16 +711,16 @@ function dispatchInputEvent(originator, data = ''){
     data: data,
     inputType: 'insertFromPaste',
     isComposing: false
-});
+  });
 
   originator.dispatchEvent(inputEvent);
 }
 
-function dispatchMouseClickEvent(originator){
-  if(!originator)  {  return;  }
+function dispatchMouseClickEvent(originator) {
+  if (!originator) { return; }
   const rect = originator.getBoundingClientRect();
-  const x  = Math.floor(Math.random() * (rect.right - rect.left + 1)) + rect.left;
-  const y  = Math.floor(Math.random() * (rect.bottom - rect.top + 1)) + rect.top;
+  const x = Math.floor(Math.random() * (rect.right - rect.left + 1)) + rect.left;
+  const y = Math.floor(Math.random() * (rect.bottom - rect.top + 1)) + rect.top;
 
   const eventMouseClick = new MouseEvent('click', {
     bubbles: true,
@@ -765,30 +737,30 @@ function dispatchMouseClickEvent(originator){
 function colapseAllCardBodies() {
   const theSideBar = getSideBar();
   theSideBar.querySelectorAll('.card-body')?.forEach((b) => {
-      if (!b.classList.contains('invisible')) {
-          b.classList.add('invisible');
-      }
+    if (!b.classList.contains('invisible')) {
+      b.classList.add('invisible');
+    }
   });
 }
 
 function removeCardEditableAttribute() {
   const theSideBar = getSideBar();
   [...theSideBar.querySelectorAll('.card-field-editable')].forEach(el => {
-      el.removeAttribute('contenteditable');
-      el.classList.remove('card-field-editable');
+    el.removeAttribute('contenteditable');
+    el.classList.remove('card-field-editable');
   });
 }
 
 
 function normaliseCard(card) {
   if (!card) {
-      showMessage('Wrong card!', error);
-      return card;
+    showMessage('Wrong card!', error);
+    return card;
   }
 
   card.querySelectorAll('.card-title, .card-body').forEach(el => {
-      el.innerHTML = '';
-      el.removeAttribute('data-index');
+    el.innerHTML = '';
+    el.removeAttribute('data-index');
   });
   card.setAttribute('data-index', '');
 
@@ -807,7 +779,7 @@ function normaliseRepoData(data) {
     });
 
     chrome.storage.local.set({ [storageDataKey]: data }, function () {
-      if (chrome.runtime.lastError) {  console.error(`${manifest.name} - [${getLineNumber()}]: Error saving data`, chrome.runtime.lastError);  }
+      if (chrome.runtime.lastError) { console.error(`${manifest.name} - [${getLineNumber()}]: Error saving data`, chrome.runtime.lastError); }
     });
     return data;
   } catch (error) {
@@ -819,29 +791,29 @@ function normaliseRepoData(data) {
 
 async function copyDataItemContent(e, cardOriginator) {
   if (!cardOriginator) {
-      showMessage('Unknown item!', 'error');
-      return;
+    showMessage('Unknown item!', 'error');
+    return;
   }
 
   const promptId = cardOriginator?.dataset?.index;
   if (!promptId) {
-      showMessage(`Prompt Id is missing or empty - (${promptId.toString()}!`);
-      return;
+    showMessage(`Prompt Id is missing or empty - (${promptId.toString()}!`);
+    return;
   }
 
   const repoData = await getRepoData();
   const repoDataRecord = repoData.find(el => el.id === promptId)?.body;
-  if (repoDataRecord) {  navigator.clipboard.writeText(repoDataRecord);  }
+  if (repoDataRecord) { navigator.clipboard.writeText(repoDataRecord); }
 
   const theSideBar = getSideBar();
   var hint = theSideBar.querySelector('#copyHint');
   if (!hint.classList.contains('invisible')) {
-      hint.classList.add('invisible');
+    hint.classList.add('invisible');
   }
 
   const repoOptions = await getOptionsFromStorage();
-  if(repoOptions && repoOptions.closeOnCopy){
-      await swapSidebarWithButton();
+  if (repoOptions && repoOptions.closeOnCopy) {
+    await swapSidebarWithButton();
   }
 
   hint.style.right = '';
@@ -851,9 +823,9 @@ async function copyDataItemContent(e, cardOriginator) {
   var viewportWidth = window.innerWidth;
 
   if (viewportWidth - e.clientX < hintWidth + 20) {
-      hint.style.right = (viewportWidth - e.clientX) + 'px';
+    hint.style.right = (viewportWidth - e.clientX) + 'px';
   } else {
-      hint.style.left = e.clientX + 'px';
+    hint.style.left = e.clientX + 'px';
   }
 
   hint.style.top = e.clientY + 'px';
@@ -861,8 +833,8 @@ async function copyDataItemContent(e, cardOriginator) {
   setTimeout(() => hint.style.opacity = 1, 10);
 
   setTimeout(function () {
-      hint.style.opacity = 0;
-      setTimeout(() => hint.classList.add('invisible'), 500);
+    hint.style.opacity = 0;
+    setTimeout(() => hint.classList.add('invisible'), 500);
   }, 2000);
 }
 
@@ -870,8 +842,8 @@ async function exportData(e) {
   let repoData = await getRepoData();
   repoData.forEach(item => delete item.id);
   if (repoData.length === 0) {
-      showMessage('No data found for export.', 'warning')
-      return;
+    showMessage('No data found for export.', 'warning')
+    return;
   }
 
   const exportFileName = `${manifest.name.replace(/\t/g, '_')}_${manifest.version}_export_${(new Date()).toISOString().split('.')[0].replace(/\D/g, '')}.json`;
@@ -888,43 +860,46 @@ async function exportData(e) {
 
 async function importedData(e) {
   if (e.target.files === 0) {
-      showMessage('No file uploaded!', 'error');
-      return;
+    showMessage('No file uploaded!', 'error');
+    return;
   }
 
   const file = e.target.files[0];
   const reader = new FileReader();
   reader.onload = async (event) => {
-      try {
-          const obj = JSON.parse(event.target.result);
-          if (!Array.isArray(obj)) {
-              showMessage('Unexpected format!', 'error');
-              return false;
-          }
-          var data = [];
-          for (let i = 0, l = obj.length; i < l; i++) {
-              if (Object.keys(obj[i])?.length === 0) { continue; }
-              if(!obj[i]?.id){  obj[i]["id"] = crypto.randomUUID();  }
-              data.push(obj[i]);
-          }
-
-          if(await setRepoData(data)){
-            showMessage('Data imported successfully.', 'success');
-            await populateData();
-          }
-      } catch (error) {
-          showMessage(`Error parsing JSON: ${error.message}`, 'error');
+    try {
+      const obj = JSON.parse(event.target.result);
+      if (!Array.isArray(obj)) {
+        showMessage('Unexpected format!', 'error');
+        return false;
       }
+      var data = [];
+      for (let i = 0, l = obj.length; i < l; i++) {
+        if (Object.keys(obj[i])?.length === 0) { continue; }
+        if (!obj[i]?.id) { obj[i]["id"] = crypto.randomUUID(); }
+        data.push(obj[i]);
+      }
+
+      if (await setRepoData(data)) {
+        showMessage('Data imported successfully.', 'success');
+        await populateData();
+      }
+    } catch (error) {
+      showMessage(`Error parsing JSON: ${error.message}`, 'error');
+    }
   };
   reader.readAsText(file);
 }
 
 function showMessage(message, type) {
+  if (!message) { return; }
   const theSideBar = getSideBar();
   let msg = theSideBar.querySelector('#feedbackMessage');
-  if ((type || 'info')?.indexOf('') !== 0) {
-    type = `${type}`;
+  if (!msg) {
+    console.error(`${manifest?.name} - [${getLineNumber()}]: #feedbackMessage element not found!`);
+    return;
   }
+  if ((type || 'info')?.indexOf('') !== 0) { type = `${type}`; }
 
   if (msg.classList.contains('feedback-message-slide')) {
     msg.classList.remove('feedback-message-slide');
@@ -935,15 +910,14 @@ function showMessage(message, type) {
   msg.innerHTML = message;
   msg.classList.remove('success', 'error', 'info', 'warning');
   msg.classList.add('feedback-message-slide', type || 'info');
-  setTimeout(() => {
-    msg.classList.remove('feedback-message-slide');
-  }, 3000);
+  setTimeout(() => { msg.classList.remove('feedback-message-slide'); }, 3000);
 }
 
 function animateMainButton(container, loop = false) {
   clearTimeout(timerId);
+  if (!container) { return; }
   const img = container.querySelectorAll('img');
-  if(!img || img.length < 2)  {  return;  }
+  if (!img || img.length < 2) { return; }
   if (!loop) {
     img[0].classList.remove('invisible');
     img[1].classList.add('invisible');
@@ -965,18 +939,17 @@ function animateMainButton(container, loop = false) {
 /// helpers
 
 function getLineNumber() {
-    const e = new Error();
-    const stackLines = e.stack.split("\n").map(line => line.trim());
-    let index = stackLines.findIndex(line => line.includes(getLineNumber.name));
+  const e = new Error();
+  const stackLines = e.stack.split("\n").map(line => line.trim());
+  let index = stackLines.findIndex(line => line.includes(getLineNumber.name));
 
-    // return stackLines[index + 1]?.replace(/\s{0,}at\s+/, '') || "Unknown";
-    return stackLines[index + 1]
-        ?.replace(/\s{0,}at\s+/, '')
-        ?.replace(/^.*?\/([^\/]+\/[^\/]+:\d+:\d+)$/, '$1')
-        || "Unknown";
+  return stackLines[index + 1]
+    ?.replace(/\s{0,}at\s+/, '')
+    ?.replace(/^.*?\/([^\/]+\/[^\/]+:\d+:\d+)$/, '$1')
+    || "Unknown";
 }
 
-async function getRepoData(){
+async function getRepoData() {
   try {
     const result = await chrome.storage.local.get([storageDataKey]);
     const data = result?.[storageDataKey] || [];
@@ -994,14 +967,14 @@ async function setRepoData(data) {
     if (chrome.runtime.lastError) {
       console.error(`${manifest.name} - [${getLineNumber()}] - Error saving data:`, chrome.runtime.lastError);
     }
-    return true
+    return true;
   } catch (error) {
     console.error(`${manifest.name} - [${getLineNumber()}] - Failed to get data from ${storageDataKey} local storage!`);
     return false;
   }
 }
 
-async function getStorageSettings(){
+async function getStorageSettings() {
   try {
     const result = await chrome.storage.local.get([storageSettingsKey]);
     const data = result?.[storageSettingsKey] || [];
@@ -1026,19 +999,20 @@ async function getOptionsFromStorage() {
     const opt = await chrome.storage.sync.get([storageOptionsKey]);
     return Object.assign({}, defaults, (opt?.[storageOptionsKey] || {}));
   } catch (e) {
-    showMessage(chrome.runtime.lastError.message, 'error');
+    console.error(`${manifest.name} - [${getLineNumber()}] - ${e.message}`, e);
+    showMessage(chrome.runtime.lastError?.message, 'error');
     return;
   }
 }
 
-function getSideBar(){
+function getSideBar() {
   return document.querySelector('ai-prompt-repo')?.shadowRoot?.querySelector('#aiPromptRepoSidebar');
 }
 
-function getMainButton(){
+function getMainButton() {
   return document.querySelector('ai-prompt-repo')?.shadowRoot?.querySelector('#mainButton');
 }
 
-function getShadowRoot(){
+function getShadowRoot() {
   return document.querySelector('ai-prompt-repo')?.shadowRoot;
 }
