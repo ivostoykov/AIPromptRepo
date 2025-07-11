@@ -1,7 +1,7 @@
 # List of significant changes and bug fixes going back to version 1.1
 
 
-### Changes in version 1.21.15 - latest
+### Changes in version 1.21.20 - latest
 
 - New & Edit Card refactored
 - Redundant buttons and elements removed

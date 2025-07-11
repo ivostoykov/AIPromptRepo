@@ -10,27 +10,20 @@ let timerId;
 
 Array.prototype.loaded = false;
 
-if (document.readyState !== 'loading') {
-  init()
-    .then(async resp => {
-      await initSidebar()
-      await populateData();
-      iniDrag();
-    })
-    .catch(e => {
-      console.error(`${manifest.name} - [${getLineNumber()}]: Init error:`, e);
-    });
-} else {
-  document.addEventListener('DOMContentLoaded', async e => {
-    try {
-      await init();
-      await initSidebar()
-      await populateData();
-    } catch {
-      console.error(`${manifest.name} - [${getLineNumber()}]: Init error after DOMContentLoaded:`, e);
-    };
-  });
-}
+document.addEventListener('DOMContentLoaded', async e => {
+  try {
+    const shouldContinue = await checkIfUrlAllowed();
+    if (!shouldContinue) {
+      document.querySelector('ai-prompt-repo')?.remove();
+      return;
+    }
+    await init();
+    await initSidebar()
+    await populateData();
+  } catch {
+    console.error(`${manifest.name} - [${getLineNumber()}]: Init error after DOMContentLoaded:`, e);
+  };
+});
 
 chrome.runtime.onMessage.addListener(async function (request, sender, sendResponse) {
   switch (request.action) {
@@ -207,7 +200,7 @@ function searBoxInputEventHandler(e) {
 async function init() {
   document.addEventListener('click', async e => {
     const theShadowRoot = getShadowRoot();
-    if (theShadowRoot.querySelector('.dialog-overlay.active')) { return; }
+    if (theShadowRoot?.querySelector('.dialog-overlay.active')) { return; }
     const repoOptions = await getOptionsFromStorage();
     if (!repoOptions?.closeOnClickOut) { return; }
     if (!theShadowRoot) { return; }
@@ -216,14 +209,12 @@ async function init() {
     }
     return;
   });
+
   const shouldContinue = await checkIfUrlAllowed();
   if (shouldContinue) {
     if (document.querySelector('ai-prompt-repo')) { return; }
   } else {
-    const aiProptRepo = document.querySelector('ai-prompt-repo');
-    if (aiProptRepo) {
-      aiProptRepo.remove();
-    }
+    document.querySelector('ai-prompt-repo')?.remove();
     return;
   }
 
