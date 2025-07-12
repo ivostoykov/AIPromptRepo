@@ -13,7 +13,7 @@
     "*://*/*"
   ],
   "background": {
-    "scripts": ["background.js"]
+    "service_worker": "background.js"
   },
   "content_scripts": [
     {
@@ -46,11 +46,5 @@
         "<all_urls>"
       ]
     }
-  ],
-  "browser_specific_settings": {
-    "gecko": {
-      "id": "{76861276-4ba2-456b-bcc2-641b7c87d9d2}",
-      "strict_min_version": "89.0"
-    }
-  }
+  ]
 }

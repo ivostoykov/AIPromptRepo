@@ -1,4 +1,5 @@
 const manifest = chrome.runtime.getManifest();
+const EXT_NAME = manifest?.name ?? 'Unknown';
 
 const storageDataKey = 'repo';
 const storageSettingsKey = 'settings';
@@ -10,31 +11,74 @@ let timerId;
 
 Array.prototype.loaded = false;
 
-document.addEventListener('DOMContentLoaded', async e => {
-  try {
-    const shouldContinue = await checkIfUrlAllowed();
-    if (!shouldContinue) {
-      document.querySelector('ai-prompt-repo')?.remove();
-      return;
+window.addEventListener('message', async (event) => {
+  if (event.source !== window) { return; }
+  if (event.data?.type === 'reconnect' && event.data.name === EXT_NAME) {
+    document.querySelector('ai-prompt-repo')?.remove();
+
+    console.debug(`>>> ${manifest?.name || 'Unknown'} - [${getLineNumber()}] - Message received will try to reconnect...`);
+
+    const ready = await waitForStorageReady();
+    if (!ready) { return; }
+
+    await start();
+    console.debug(`>>> ${manifest?.name || 'Unknown'} - [${getLineNumber()}] - Extension reloaded.`);
+  }
+});
+
+async function waitForStorageReady(timeout = 2000) {
+  const start = Date.now();
+  while (Date.now() - start < timeout) {
+    try {
+      await chrome.storage.local.get(null);
+      console.debug(`>>> ${manifest?.name || 'Unknown'} - [${getLineNumber()}] - storage ready.`);
+      return true;
+    } catch {
+      console.debug(`>>> ${manifest?.name || 'Unknown'} - [${getLineNumber()}] - storage NOT ready.`);
+      await new Promise(res => setTimeout(res, 100));
     }
-    await init();
-    await initSidebar()
-    await populateData();
-  } catch {
-    console.error(`${manifest.name} - [${getLineNumber()}]: Init error after DOMContentLoaded:`, e);
-  };
+  }
+  console.warn(`>>> ${manifest?.name || 'Unknown'} - [${getLineNumber()}] - Storage not ready after timeout`);
+  return false;
+}
+
+//------------------
+
+document.addEventListener('DOMContentLoaded', async e => {
+  await start();
 });
 
 chrome.runtime.onMessage.addListener(async function (request, sender, sendResponse) {
+  let responseObj = {};
   switch (request.action) {
     case 'optionsChanged':
       await init();
+      break;
+    case 'ping':
+      responseObj = { pong: true };
       break;
     default:
       console.log(`${manifest.name} - [${getLineNumber()}]: Unknown action - ${request.action}`);
       break;
   }
+
+  sendResponse(responseObj ?? {});
+  return true;
+
 });
+
+async function start(){
+  try {
+    document.querySelector('ai-prompt-repo')?.remove();
+    const shouldContinue = await checkIfUrlAllowed();
+    if (!shouldContinue) {  return;  }
+    await init();
+    await initSidebar()
+    await populateData();
+  } catch {
+    console.error(`${manifest.name} - [${getLineNumber()}]: Init error after DOMContentLoaded:`, e);
+  }
+}
 
 function getExtURL(resourceRelativePath) {
   return chrome.runtime.getURL(resourceRelativePath)
@@ -293,10 +337,10 @@ async function populateData() {
   const theSideBar = getSideBar();
   const emptyElement = theSideBar.querySelector('.empty-element');
   const cardContainer = theSideBar.querySelector('.main-content');
-  let card = cardContainer.querySelector('.card');
-  const repoData = await getRepoData();
-
+  let card = cardContainer?.querySelector('.card');
   if (!card) { return; }
+
+  const repoData = await getRepoData();
 
   card = normaliseCard(card.cloneNode(true));
   cardContainer.innerHTML = '';
@@ -759,25 +803,33 @@ function normaliseCard(card) {
 }
 
 function normaliseRepoData(data) {
-  const origDatta = [...data];
-  let isDirty = false;
   try {
-    (data || [])?.forEach(el => {
-      if (!el?.id) {
-        el["id"] = crypto.randomUUID();
+    const origData = Array.isArray(data) ? data.map(el => ({ ...el })) : [];
+    let isDirty = false;
+
+    const newData = origData.map(el => {
+      if (!el.id) {
         isDirty = true;
+        return { ...el, id: crypto.randomUUID() };
       }
+      return el;
     });
 
-    chrome.storage.local.set({ [storageDataKey]: data }, function () {
-      if (chrome.runtime.lastError) { console.error(`${manifest.name} - [${getLineNumber()}]: Error saving data`, chrome.runtime.lastError); }
-    });
-    return data;
+    if (isDirty) {
+      chrome.storage.local.set({ [storageDataKey]: newData }, function () {
+        if (chrome.runtime.lastError) {
+          console.error(`${manifest.name} - [${getLineNumber()}]: Error saving data`, chrome.runtime.lastError);
+        }
+      });
+    }
+
+    return newData;
   } catch (error) {
-    console.error(`${manifest.name} - [${getLineNumber()}]: Error saving data`, chrome.runtime.lastError);
-    return origDatta;
+    console.error(`${manifest.name} - [${getLineNumber()}]: Unexpected error`, error);
+    return data;
   }
 }
+
 
 
 async function copyDataItemContent(e, cardOriginator) {
@@ -943,7 +995,8 @@ function getLineNumber() {
 async function getRepoData() {
   try {
     const result = await chrome.storage.local.get([storageDataKey]);
-    const data = result?.[storageDataKey] || [];
+    let data = result?.[storageDataKey] || [];
+    data = normaliseRepoData(data);
     data.loaded = true;
     return data;
   } catch (error) {
@@ -954,6 +1007,7 @@ async function getRepoData() {
 
 async function setRepoData(data) {
   try {
+    data = normaliseRepoData(data);
     await chrome.storage.local.set({ [storageDataKey]: data });
     if (chrome.runtime.lastError) {
       console.error(`${manifest.name} - [${getLineNumber()}] - Error saving data:`, chrome.runtime.lastError);

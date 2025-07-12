@@ -1,7 +1,12 @@
 # List of significant changes and bug fixes going back to version 1.1
 
+### Changes in version 1.21.25 - latest
 
-### Changes in version 1.21.20 - latest
+- Added check to ensure frond and backend script are attached.
+- Added preload check for allowed sites to avoid redundant contnet load
+- Added UI reload when extention has been updated
+
+### Changes in version 1.21.20
 
 - New & Edit Card refactored
 - Redundant buttons and elements removed

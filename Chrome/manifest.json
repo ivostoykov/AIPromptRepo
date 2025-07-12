@@ -1,12 +1,16 @@
 {
   "manifest_version": 3,
   "name": "AI Prompt Repo",
-  "version": "1.21.20",
+  "version": "1.21.25",
   "options_page": "options.html",
   "permissions": [
     "activeTab",
     "storage",
-    "tabs"
+    "tabs",
+    "scripting"
+  ],
+  "host_permissions": [
+    "*://*/*"
   ],
   "background": {
     "service_worker": "background.js"
