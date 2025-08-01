@@ -16,13 +16,13 @@ window.addEventListener('message', async (event) => {
   if (event.data?.type === 'reconnect' && event.data.name === EXT_NAME) {
     document.querySelector('ai-prompt-repo')?.remove();
 
-    console.debug(`>>> ${manifest?.name || 'Unknown'} - [${getLineNumber()}] - Message received will try to reconnect...`);
+    console.debug(` -> ${manifest?.name || 'Unknown'} - [${getLineNumber()}] - Signal received. Will try to reconnect...`);
 
     const ready = await waitForStorageReady();
     if (!ready) { return; }
 
     await start();
-    console.debug(`>>> ${manifest?.name || 'Unknown'} - [${getLineNumber()}] - Extension reloaded.`);
+    console.debug(` -> ${manifest?.name || 'Unknown'} - [${getLineNumber()}] - Extension reloaded.`);
   }
 });
 
@@ -31,20 +31,21 @@ async function waitForStorageReady(timeout = 2000) {
   while (Date.now() - start < timeout) {
     try {
       await chrome.storage.local.get(null);
-      console.debug(`>>> ${manifest?.name || 'Unknown'} - [${getLineNumber()}] - storage ready.`);
+      console.debug(` -> ${manifest?.name || 'Unknown'} - [${getLineNumber()}] - storage ready.`);
       return true;
     } catch {
-      console.debug(`>>> ${manifest?.name || 'Unknown'} - [${getLineNumber()}] - storage NOT ready.`);
+      console.debug(` -> ${manifest?.name || 'Unknown'} - [${getLineNumber()}] - storage NOT ready.`);
       await new Promise(res => setTimeout(res, 100));
     }
   }
-  console.warn(`>>> ${manifest?.name || 'Unknown'} - [${getLineNumber()}] - Storage not ready after timeout`);
+  console.warn(` -> ${manifest?.name || 'Unknown'} - [${getLineNumber()}] - Storage not ready after timeout`);
   return false;
 }
 
 //------------------
 
 document.addEventListener('DOMContentLoaded', async e => {
+  console.debug(` -> ${manifest.name} - [${getLineNumber()}]: Document loaded. Trying to start...`);
   await start();
 });
 
@@ -58,7 +59,7 @@ chrome.runtime.onMessage.addListener(async function (request, sender, sendRespon
       responseObj = { pong: true };
       break;
     default:
-      console.log(`${manifest.name} - [${getLineNumber()}]: Unknown action - ${request.action}`);
+      console.log(` -> ${manifest.name} - [${getLineNumber()}]: Unknown action - ${request.action}`);
       break;
   }
 
@@ -67,16 +68,18 @@ chrome.runtime.onMessage.addListener(async function (request, sender, sendRespon
 
 });
 
-async function start(){
+async function start() {
   try {
+    console.debug(` -> ${manifest.name} - [${getLineNumber()}]: loading...`);
     document.querySelector('ai-prompt-repo')?.remove();
     const shouldContinue = await checkIfUrlAllowed();
-    if (!shouldContinue) {  return;  }
+    if (!shouldContinue) { return; }
     await init();
     await initSidebar()
     await populateData();
+    iniDrag();
   } catch {
-    console.error(`${manifest.name} - [${getLineNumber()}]: Init error after DOMContentLoaded:`, e);
+    console.error(` -> ${manifest.name} - [${getLineNumber()}]: Init error after DOMContentLoaded:`, e);
   }
 }
 
@@ -152,7 +155,7 @@ async function initSidebar() {
   theSideBar.querySelector('#menuOptions').addEventListener('click', function (e) {
     if (!chrome.runtime.id) {
       showMessage('Please reload the tab because has been disconnected.');
-      console.debug(`${manifest?.name} - [${getLineNumber()}] - chrome.runtime.id is missing - perhaps an update is  pending or was applied.`);
+      console.debug(` -> ${manifest?.name} - [${getLineNumber()}] - chrome.runtime.id is missing - perhaps an update is  pending or was applied.`);
       return;
     }
     chrome.runtime.sendMessage({ action: "openOptionsPage" });
@@ -180,6 +183,7 @@ async function initSidebar() {
   theSideBar.addEventListener('mouseenter', (e) => {
     animateMainButton(theSideBar.querySelector('.app-icon'), true);
   });
+  console.debug(` -> ${manifest.name} - [${getLineNumber()}]: UI ready.`);
 }
 
 async function buildSidebarAndFetchContent(sidebarLoadedCallback) {
@@ -215,7 +219,7 @@ async function buildSidebarAndFetchContent(sidebarLoadedCallback) {
 
     return theSideBar;
   } catch (error) {
-    return console.error(`${manifest.name} - [${getLineNumber()}]: Error loading the HTML:`, error);
+    return console.error(` -> ${manifest.name} - [${getLineNumber()}]: Error loading the HTML:`, error);
   }
 }
 
@@ -274,7 +278,9 @@ async function init() {
     document.body.appendChild(container);
     container.classList.remove('invisible');
   } catch (err) {
-    console.error(`${manifest.name} - [${getLineNumber()}]: Error`, err);
+    console.error(` -> ${manifest.name} - [${getLineNumber()}]: Error`, err);
+  } finally {
+    console.debug(` -> ${manifest.name} - [${getLineNumber()}]: init completed.`);
   }
 }
 
@@ -285,7 +291,7 @@ async function checkIfUrlAllowed() {
     if (urls.length < 1 || urls[0].trim() === '*') { return true; }
     return urls.some(el => el.includes(location.hostname) || location.hostname.includes(el));
   } catch (err) {
-    console.error(`${manifest.name}: Error`, err);
+    console.error(` -> ${manifest.name}: Error`, err);
     return false;
   }
 }
@@ -310,7 +316,7 @@ function onCardHeaderClick(e) {
   } else {
     card.classList.remove('card-selected', 'card-expanded');
     card.classList.add('draggable');
-    card.setAttribute('draggable', 'ture');
+    card.setAttribute('draggable', 'true');
     card.querySelector('.expander').classList.remove('is-open');
   }
 }
@@ -379,6 +385,7 @@ async function populateData() {
 
     cardContainer.appendChild(newCard);
   });
+  console.debug(` -> ${manifest.name} - [${getLineNumber()}]: Data loaded.`);
 }
 
 async function onRibbonButtonClick(e) {
@@ -398,6 +405,9 @@ async function onRibbonButtonClick(e) {
       break;
     case 'edit':
       await editCard(e, clickedButton.closest('.card'));
+      break;
+    case 'putinto':
+      await putInto(e, clickedButton.closest('.card'));
       break;
     case 'sendto':
       await sendTo(e, clickedButton.closest('.card'));
@@ -438,7 +448,7 @@ function onSearchClick(e) {
   setTimeout(e => theSideBar.querySelector('.app-icon')?.classList.toggle('behind'), 250);
 
   if (!searchBox || !clearBtn) {
-    console.error(`${manifest?.name} - [${getLineNumber()}] - Search elements not found!`, e.target, e.currentTarget);
+    console.error(` -> ${manifest?.name} - [${getLineNumber()}] - Search elements not found!`, e.target, e.currentTarget);
     return;
   }
 
@@ -462,7 +472,7 @@ function onSearchClick(e) {
       break;
 
     default:
-      console.error(`${manifest?.name} - [${getLineNumber()}] - Unknkown action - ${action}!`, e.target, e.currentTarget);
+      console.error(` -> ${manifest?.name} - [${getLineNumber()}] - Unknkown action - ${action}!`, e.target, e.currentTarget);
       break;
   }
 }
@@ -520,7 +530,7 @@ async function editCard(e, cardOriginator) {
 
   const cardIndex = cardOriginator?.dataset?.index;
   if (!cardIndex) {
-    console.error(`${manifest?.name} - [${getLineNumber()}]: card index is empty or not found!`, cardOriginator);
+    console.error(` -> ${manifest?.name} - [${getLineNumber()}]: card index is empty or not found!`, cardOriginator);
     showMessage('Missing card index!', 'error');
     return;
   }
@@ -553,10 +563,10 @@ async function saveEdit(card) {
   if (res) {
     showMessage(`${title} saved.`, 'success');
     updateCardElement(card);
-    console.log(`${manifest?.name} - [${getLineNumber()}]: Saved`, id, title);
+    console.log(` -> ${manifest?.name} - [${getLineNumber()}]: Saved`, id, title);
   } else {
     showMessage(`Failed to save ${title}!`, 'error');
-    console.log(`${manifest?.name} - [${getLineNumber()}]: NOT Saved`, id, title);
+    console.log(` -> ${manifest?.name} - [${getLineNumber()}]: NOT Saved`, id, title);
   }
 }
 
@@ -570,7 +580,7 @@ function updateCardElement(card) {
     theCardEl.querySelector('.card-title').textContent = title;
     theCardEl.querySelector('.card-body').textContent = body;
   } catch (err) {
-    console.error(`${manifest?.name} - [${getLineNumber()}]: ${err.message}`, err);
+    console.error(` -> ${manifest?.name} - [${getLineNumber()}]: ${err.message}`, err);
   }
 }
 
@@ -584,20 +594,20 @@ async function deleteCard(e, cardOriginator) {
     if (!response) { return; }
     await onDeleteConfirmation(e, cardOriginator);
   } catch (error) {
-    console.error(`${manifest.name} - [${getLineNumber()}] - Error occurred with response`, error, response);
+    console.error(` -> ${manifest.name} - [${getLineNumber()}] - Error occurred with response`, error, response);
   }
 }
 
 async function onDeleteConfirmation(e, cardOriginator) {
   if (!cardOriginator) {
-    console.error(`${manifest.name} - [${getLineNumber()}] - Error occurred with response`, cardOriginator);
+    console.error(` -> ${manifest.name} - [${getLineNumber()}] - Error occurred with response`, cardOriginator);
     showMessage('Unknown item!', 'error');
     return;
   }
 
   const promptId = cardOriginator.dataset.index;
   if (!promptId) {
-    console.error(`${manifest.name} - [${getLineNumber()}] - Prompt Id is missing or not found (${promptId})!`);
+    console.error(` -> ${manifest.name} - [${getLineNumber()}] - Prompt Id is missing or not found (${promptId})!`);
     showMessage(`Prompt Id is missing or not found (${promptId})!`);
     return;
   }
@@ -605,7 +615,7 @@ async function onDeleteConfirmation(e, cardOriginator) {
   const repoData = await getRepoData();
   const index = repoData.findIndex(el => el.id === promptId);
   if (index < 0) {
-    console.log(`${manifest.name} - [${getLineNumber()}] No prompt id with a value ${promptId} was found!`, repoData);
+    console.log(` -> ${manifest.name} - [${getLineNumber()}] No prompt id with a value ${promptId} was found!`, repoData);
     return;
   }
 
@@ -629,6 +639,7 @@ async function updateData(objData, rebuild = true) {
     showMessage('Data saved.', 'success');
     if (rebuild) {
       await populateData();
+      iniDrag();
     }
   } catch (err) {
     showMessage(chrome.runtime.lastError?.message || err.message, 'error');
@@ -666,6 +677,54 @@ function getInputElement() {
     }
   }
   return receiver;
+}
+
+async function putInto(e, cardOriginator) {
+  if (!cardOriginator) {
+    showMessage('Unknown item!', 'error');
+    return;
+  }
+
+  const promptId = cardOriginator?.dataset?.index;
+  if (!promptId) {
+    showMessage(`Prompt Id is missing or empty (${promptId.toString()})!`);
+    return;
+  }
+
+  showMessage('Copied. Click on the target to paste.');
+  const insertIntoDocumentClickListener = async event => {
+    await click2insert(event, promptId, () => document.removeEventListener('click', insertIntoDocumentClickListener));
+  };
+
+  document.addEventListener('click', insertIntoDocumentClickListener);
+}
+
+async function click2insert(e, promptId, callback) {
+  try {
+    const repoData = await getRepoData()
+    const repoDataReord = repoData.find(el => el.id === promptId);
+
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+      e.target.value += repoDataReord?.body;
+    } else if (e.target.isContentEditable) {
+      const lines = repoDataReord?.body?.split('\n');
+      lines.forEach((line, index) => {
+        const p = document.createElement('p');
+        if (!line) {
+          p.appendChild(document.createElement('br'));
+        } else {
+          p.textContent = line;
+        }
+        e.target.appendChild(p);
+      });
+    }
+  } catch (error) {
+    console.error(`>>> ${manifest?.name || 'Unknown'} - [${getLineNumber()}] - error: ${error.message}`, error);
+  } finally {
+    if (typeof (callback) === 'function') {
+      callback();
+    }
+  }
 }
 
 async function sendTo(e, cardOriginator, run = false) {
@@ -818,14 +877,14 @@ function normaliseRepoData(data) {
     if (isDirty) {
       chrome.storage.local.set({ [storageDataKey]: newData }, function () {
         if (chrome.runtime.lastError) {
-          console.error(`${manifest.name} - [${getLineNumber()}]: Error saving data`, chrome.runtime.lastError);
+          console.error(` -> ${manifest.name} - [${getLineNumber()}]: Error saving data`, chrome.runtime.lastError);
         }
       });
     }
 
     return newData;
   } catch (error) {
-    console.error(`${manifest.name} - [${getLineNumber()}]: Unexpected error`, error);
+    console.error(` -> ${manifest.name} - [${getLineNumber()}]: Unexpected error`, error);
     return data;
   }
 }
@@ -926,6 +985,7 @@ async function importedData(e) {
       if (await setRepoData(data)) {
         showMessage('Data imported successfully.', 'success');
         await populateData();
+        iniDrag();
       }
     } catch (error) {
       showMessage(`Error parsing JSON: ${error.message}`, 'error');
@@ -939,7 +999,7 @@ function showMessage(message, type) {
   const theSideBar = getSideBar();
   let msg = theSideBar.querySelector('#feedbackMessage');
   if (!msg) {
-    console.error(`${manifest?.name} - [${getLineNumber()}]: #feedbackMessage element not found!`);
+    console.error(` -> ${manifest?.name} - [${getLineNumber()}]: #feedbackMessage element not found!`);
     return;
   }
   if ((type || 'info')?.indexOf('') !== 0) { type = `${type}`; }
@@ -1000,7 +1060,7 @@ async function getRepoData() {
     data.loaded = true;
     return data;
   } catch (error) {
-    console.error(`${manifest.name} - [${getLineNumber()}] - Failed to get data from ${storageDataKey} local storage!`);
+    console.error(` -> ${manifest.name} - [${getLineNumber()}] - Failed to get data from ${storageDataKey} local storage!`);
     return [];
   }
 }
@@ -1010,11 +1070,11 @@ async function setRepoData(data) {
     data = normaliseRepoData(data);
     await chrome.storage.local.set({ [storageDataKey]: data });
     if (chrome.runtime.lastError) {
-      console.error(`${manifest.name} - [${getLineNumber()}] - Error saving data:`, chrome.runtime.lastError);
+      console.error(` -> ${manifest.name} - [${getLineNumber()}] - Error saving data:`, chrome.runtime.lastError);
     }
     return true;
   } catch (error) {
-    console.error(`${manifest.name} - [${getLineNumber()}] - Failed to get data from ${storageDataKey} local storage!`);
+    console.error(` -> ${manifest.name} - [${getLineNumber()}] - Failed to get data from ${storageDataKey} local storage!`);
     return false;
   }
 }
@@ -1025,7 +1085,7 @@ async function getStorageSettings() {
     const data = result?.[storageSettingsKey] || [];
     return data;
   } catch (error) {
-    console.error(`${manifest.name} - [${getLineNumber()}] - Failed to get data from ${storageSettingsKey} local storage!`);
+    console.error(` -> ${manifest.name} - [${getLineNumber()}] - Failed to get data from ${storageSettingsKey} local storage!`);
     return [];
   }
 }
@@ -1044,7 +1104,7 @@ async function getOptionsFromStorage() {
     const opt = await chrome.storage.sync.get([storageOptionsKey]);
     return Object.assign({}, defaults, (opt?.[storageOptionsKey] || {}));
   } catch (e) {
-    console.error(`${manifest.name} - [${getLineNumber()}] - ${e.message}`, e);
+    console.error(` -> ${manifest.name} - [${getLineNumber()}] - ${e.message}`, e);
     showMessage(chrome.runtime.lastError?.message, 'error');
     return;
   }

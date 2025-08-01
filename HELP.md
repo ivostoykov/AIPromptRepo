@@ -13,12 +13,12 @@ The snippet list can be `Export`ed and `Import`ed from here. The `Options` page 
 
 ![Ribbon](meida/ribbon.png)
 
-On the left is the main menu (<img src="ext/img/menu.svg" height="16"/>).
+On the left is the main menu (<img src="src/img/menu.svg" height="16"/>).
 
 On the right-hand side, from right to left, are:
-* Close button ( <img src="ext/img/close.svg" height="24"/> )
-* New item button ( <img src="ext/img/newitem.svg" height="24"/> )
-* Search button ( <img src="ext/img/search.svg" height="24"/> )
+* Close button ( <img src="src/img/close.svg" height="24"/> )
+* New item button ( <img src="src/img/newitem.svg" height="24"/> )
+* Search button ( <img src="src/img/search.svg" height="24"/> )
 
 #### Search to filter
 
@@ -32,20 +32,20 @@ The elements from left to right are:
 
 ---
 
-* Expand/Collapse button ( <img src="ext/img/left-arrowhead.svg" height="16"/> )
+* Expand/Collapse button ( <img src="src/img/left-arrowhead.svg" height="16"/> )
 
 <img src="meida/expand.gif" width="450" alt="Expand and Collapse" />
 
 ---
 
 * Title - a free descriptive text giving a hint what the card contains
-* Copy button ( <img src="ext/img/copy.svg" height="24"/> )
+* Copy button ( <img src="src/img/copy.svg" height="24"/> )
 
 ---
 
-* Edit button ( <img src="ext/img/edit.svg" height="24"/> )
+* Edit button ( <img src="src/img/edit.svg" height="24"/> )
 
-`Save` ( <img src="ext/img/save.svg" height="24"/> ), `Cancel` ( <img src="ext/img/cancel.svg" height="24"/> ) or `Skipt` ( <img src="ext/img/skip.svg" height="24"/> ) to the next will be available when edit mode is active.
+`Save` ( <img src="src/img/save.svg" height="24"/> ), `Cancel` ( <img src="src/img/cancel.svg" height="24"/> ) or `Skipt` ( <img src="src/img/skip.svg" height="24"/> ) to the next will be available when edit mode is active.
 
 One can edit the title ...
 
@@ -57,13 +57,15 @@ or the body.
 
 ---
 
-* Send to button ( <img src="ext/img/sendto.svg" height="24"/> )
+* Put into button ( <img src="src/img/import.svg" height="24"/> ) - copies content and allow pasting it into any element with left click.
+
+* Send to button ( <img src="src/img/sendto.svg" height="24"/> ) - sends content to the  first found suitable element - usually textarea or input type text.
 
 **Note:** This will try to insert the body of the card into recognizable input or active elements that accept user input. As feasible targets are text inputs, textareas, and elements with set contenteditable attribute. (*see the next item for more information*)
 
 ---
 
-* Send to and Run button ( <img src="ext/img/sendtorun.svg" height="24"/> )
+* Send to and Run button ( <img src="src/img/sendtorun.svg" height="24"/> )
 
 <img src="meida/execute.gif" width="450" alt="Execute" title="Execute"/>
 
@@ -73,7 +75,7 @@ or the body.
 
 ---
 
-* Delete button ( <img src="ext/img/delete.svg" height="24"/> )
+* Delete button ( <img src="src/img/delete.svg" height="24"/> )
 
 
 

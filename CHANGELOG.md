@@ -1,6 +1,12 @@
 # List of significant changes and bug fixes going back to version 1.1
 
-### Changes in version 1.21.25 - latest
+### Changes in version 1.21.28 - latest
+
+- Fixed drag reorder bug
+- New button: left-click to paste copied data into any element
+- Help page updated.
+
+### Changes in version 1.21.25
 
 - Added check to ensure frond and backend script are attached.
 - Added preload check for allowed sites to avoid redundant contnet load
